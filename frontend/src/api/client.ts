@@ -107,3 +107,23 @@ function versErreur(statut: number, donnees: unknown): ErreurApi {
     (statut === 404 ? 'Introuvable.' : 'Une erreur est survenue, réessayez.')
   return new ErreurApi(message, statut, violations)
 }
+
+/** Télécharge un fichier protégé par le jeton (ex. export CSV) et le propose à l'enregistrement. */
+export async function telecharger(chemin: string, nomParDefaut: string): Promise<void> {
+  const valeurJeton = jeton.lire()
+  const reponse = await fetch(`/api${chemin}`, {
+    headers: valeurJeton ? { Authorization: `Bearer ${valeurJeton}` } : {},
+  })
+  if (!reponse.ok) throw new ErreurApi('Export impossible, réessayez.', reponse.status)
+
+  const nom =
+    /filename="?([^";]+)"?/.exec(reponse.headers.get('Content-Disposition') ?? '')?.[1] ?? nomParDefaut
+  const url = URL.createObjectURL(await reponse.blob())
+  const lien = document.createElement('a')
+  lien.href = url
+  lien.download = nom
+  document.body.append(lien)
+  lien.click()
+  lien.remove()
+  URL.revokeObjectURL(url)
+}

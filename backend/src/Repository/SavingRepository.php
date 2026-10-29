@@ -67,4 +67,29 @@ class SavingRepository extends ServiceEntityRepository
 
         return ['elements' => $elements, 'total' => $total];
     }
+
+    /**
+     * Toutes les économies d'un utilisateur (statistiques, export), des plus récentes aux plus anciennes.
+     *
+     * @return list<Saving>
+     */
+    public function toutes(User $user, ?\DateTimeImmutable $du = null, ?\DateTimeImmutable $au = null): array
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->addSelect('d')
+            ->leftJoin('s.deal', 'd')
+            ->andWhere('s.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('s.date', 'DESC')
+            ->addOrderBy('s.id', 'DESC');
+        if (null !== $du) {
+            $qb->andWhere('s.date >= :du')->setParameter('du', $du->setTime(0, 0), Types::DATE_IMMUTABLE);
+        }
+        if (null !== $au) {
+            $qb->andWhere('s.date <= :au')->setParameter('au', $au->setTime(0, 0), Types::DATE_IMMUTABLE);
+        }
+
+        /** @var list<Saving> */
+        return $qb->getQuery()->getResult();
+    }
 }

@@ -138,3 +138,17 @@ export interface RecapApercu {
     }[]
   }[]
 }
+
+export interface StatistiquesEconomies {
+  total: string
+  nombre: number
+  totalMois: string
+  totalMoisPrecedent: string
+  totalAnnee: string
+  totalSemaine: string
+  moyenneMensuelle: string
+  meilleurMois: string | null
+  parMois: { mois: string; total: string; nombre: number }[]
+  parEnseigne: { enseigne: string; total: string; nombre: number }[]
+  parType: { type: string; libelle: string; total: string; nombre: number }[]
+}

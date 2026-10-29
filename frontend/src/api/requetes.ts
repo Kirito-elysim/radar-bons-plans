@@ -9,6 +9,7 @@ import type {
   Profil,
   PushConfiguration,
   RecapApercu,
+  StatistiquesEconomies,
   TableauDeBord,
   TikTokApercu,
 } from './types'
@@ -50,6 +51,7 @@ export const cles = {
   moi: ['moi'] as const,
   push: ['push'] as const,
   recap: ['recap'] as const,
+  statistiques: ['statistiquesEconomies'] as const,
 }
 
 export function useBonsPlans(params: ParametresRecherche, actif = true) {
@@ -129,6 +131,7 @@ export function useAjouterEconomie() {
     }) => api<Economie>('/economies', 'POST', e),
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: cles.economies })
+      void client.invalidateQueries({ queryKey: cles.statistiques })
       void client.invalidateQueries({ queryKey: cles.tableauDeBord })
     },
   })
@@ -140,6 +143,7 @@ export function useSupprimerEconomie() {
     mutationFn: (id: number) => api<null>(`/economies/${id}`, 'DELETE'),
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: cles.economies })
+      void client.invalidateQueries({ queryKey: cles.statistiques })
       void client.invalidateQueries({ queryKey: cles.tableauDeBord })
     },
   })
@@ -196,4 +200,32 @@ export function useTestNotifications() {
 
 export function useRecapApercu(actif: boolean) {
   return useQuery({ queryKey: cles.recap, queryFn: () => api<RecapApercu>('/recap/apercu'), enabled: actif })
+}
+
+export function useStatistiquesEconomies() {
+  return useQuery({
+    queryKey: cles.statistiques,
+    queryFn: () => api<StatistiquesEconomies>('/economies/statistiques'),
+  })
+}
+
+export function useModifierEconomie() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      id,
+      ...e
+    }: {
+      id: number
+      libelle?: string
+      montant?: string
+      date?: string
+      enseigne?: string | null
+    }) => api<Economie>(`/economies/${id}`, 'PATCH', e),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: cles.economies })
+      void client.invalidateQueries({ queryKey: cles.statistiques })
+      void client.invalidateQueries({ queryKey: cles.tableauDeBord })
+    },
+  })
 }

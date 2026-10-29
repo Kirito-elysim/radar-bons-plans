@@ -14,6 +14,8 @@
   --ambre-fond: #fdf0dc;
   --gain: #1f7a6d;
   --gain-fond: #dff2ee;
+  /* Barres des graphiques (validées : bande de luminosité, chroma, contraste ≥ 3:1 sur la surface) */
+  --viz-gain: #0c8a70;
   --accent: #14213d;
   --sur-accent: #f6f3ec;
   --ombre: 0 1px 2px rgb(20 33 61 / 6%), 0 4px 16px rgb(20 33 61 / 6%);
@@ -40,6 +42,7 @@
     --ambre-fond: #3a2c17;
     --gain: #5ed1bd;
     --gain-fond: #15332f;
+    --viz-gain: #22ab90;
     --accent: #f6f3ec;
     --sur-accent: #14213d;
     --ombre: 0 1px 2px rgb(0 0 0 / 30%);
@@ -181,6 +184,8 @@ select {
 
 .page {
   display: grid;
+  /* minmax(0, …) : un contenu large (SVG, ligne d'outils) ne doit pas élargir la page au-delà de l'écran */
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.25rem;
 }
 
@@ -588,9 +593,10 @@ select {
 
 .section__tete {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 1rem;
+  gap: 0.5rem 1rem;
 }
 
 .section__nombre {
@@ -1189,4 +1195,201 @@ select {
   border: 1px solid var(--trait);
   background: var(--papier);
   font-size: 1rem;
+}
+
+/* ---------- Suivi des économies ---------- */
+
+.grille-economies {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 900px) {
+  .grille-economies {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+.bloc__sous-titre {
+  margin-top: 0.5rem;
+}
+
+.graphique {
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.graphique__zone {
+  position: relative;
+}
+
+.graphique svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.graphique__grille {
+  stroke: var(--trait);
+  stroke-width: 1;
+}
+
+.graphique__base {
+  stroke: var(--encre-douce);
+  stroke-width: 1;
+}
+
+.graphique__axe {
+  fill: var(--encre-douce);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.graphique__valeur {
+  fill: var(--encre);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.graphique__barre {
+  fill: var(--viz-gain);
+  transition: opacity 0.15s;
+}
+
+.graphique__zone:has(.graphique__barre.actif) .graphique__barre:not(.actif) {
+  opacity: 0.45;
+}
+
+.graphique__cible {
+  fill: transparent;
+  cursor: default;
+  outline: none;
+}
+
+.graphique__cible:focus-visible {
+  stroke: var(--signal);
+  stroke-width: 2;
+}
+
+.infobulle {
+  position: absolute;
+  top: 0;
+  transform: translate(-50%, -100%);
+  display: grid;
+  gap: 2px;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--rayon-petit);
+  background: var(--encre);
+  color: var(--papier);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--ombre);
+}
+
+.infobulle strong::first-letter {
+  text-transform: uppercase;
+}
+
+.graphique__tableau summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--encre-douce);
+}
+
+.graphique__tableau table {
+  width: 100%;
+  margin-top: 0.5rem;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.graphique__tableau th,
+.graphique__tableau td {
+  padding: 0.3rem 0.4rem;
+  border-bottom: 1px solid var(--trait);
+  text-align: right;
+}
+
+.graphique__tableau th:first-child {
+  text-align: left;
+  font-weight: 500;
+}
+
+.barres {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.barres__ligne {
+  display: grid;
+  grid-template-columns: minmax(90px, 34%) 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+}
+
+.barres__nom {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barres__piste {
+  height: 10px;
+}
+
+.barres__barre {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  background: var(--viz-gain);
+  border-radius: 0 4px 4px 0;
+}
+
+.barres__valeur {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.export {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.export select {
+  min-height: 34px;
+  padding: 0 0.5rem;
+  border-radius: var(--rayon-petit);
+  border: 1px solid var(--trait);
+  background: var(--surface);
+}
+
+.liste-economies__corps {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Sur téléphone le SVG est réduit de moitié : on grossit les textes pour rester lisible (≈ 10-11 px à l'écran). */
+@media (max-width: 600px) {
+  .graphique__axe {
+    font-size: 19px;
+  }
+
+  .graphique__valeur {
+    font-size: 21px;
+  }
 }
