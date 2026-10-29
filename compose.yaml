@@ -1,0 +1,35 @@
+# Docker Compose de développement (les services nginx, worker et scheduler arriveront aux étapes suivantes)
+services:
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: dev
+    volumes:
+      - ./backend:/app
+    environment:
+      DATABASE_URL: postgresql://radar:radar@postgres:5432/radar?serverVersion=16&charset=utf8
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: radar
+      POSTGRES_USER: radar
+      POSTGRES_PASSWORD: radar
+      TZ: Europe/Paris
+    ports:
+      - "${POSTGRES_PORT_HOTE:-55432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U radar -d radar"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
