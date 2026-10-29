@@ -6,14 +6,20 @@ namespace App\Collecte;
 
 /**
  * Calcule l'empreinte de dédoublonnage d'un bon plan : source + URL normalisée + titre normalisé.
+ * Quand la source fournit un identifiant stable (ex. id Shopmium, id Radins), il remplace l'URL et le titre :
+ * le bon plan reste le même même si son libellé change.
  */
 final class DealHasher
 {
     /** Paramètres de suivi retirés des URL avant comparaison. */
     private const PARAMS_SUIVI = ['fbclid', 'gclid', 'msclkid', 'mc_cid', 'mc_eid', 'ref', 'xtor'];
 
-    public function hash(string $codeSource, string $url, string $titre): string
+    public function hash(string $codeSource, string $url, string $titre, ?string $idExterne = null): string
     {
+        if (null !== $idExterne && '' !== $idExterne) {
+            return hash('sha256', $codeSource."\nid:".$idExterne);
+        }
+
         return hash('sha256', implode("\n", [
             $codeSource,
             self::normaliserUrl($url),

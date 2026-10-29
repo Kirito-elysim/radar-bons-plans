@@ -31,6 +31,10 @@ final readonly class DealDTO
         public bool $exclusifAppli = false,
         public ?string $region = null,
         public ?string $imageUrl = null,
+        /** Identifiant stable sur la source, prioritaire pour le dédoublonnage. */
+        public ?string $idExterne = null,
+        /** Pseudo du créateur suivi à l'origine du bon plan (pages « lien en bio »). */
+        public ?string $createurPseudo = null,
     ) {
     }
 }

@@ -13,7 +13,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Enregistre une page réelle dans tests/fixtures/ (via le client poli : robots.txt et throttling respectés).
- * Scripts, styles, iframes et publicités sont retirés pour ne garder que la structure utile au parsing.
+ * Scripts, styles, iframes et publicités sont retirés pour ne garder que la structure utile au parsing ;
+ * les scripts de données JSON (__NEXT_DATA__, application/json, ld+json) sont conservés.
  */
 #[AsCommand(name: 'app:fixtures:capturer', description: 'Enregistre une page source comme fixture HTML de test')]
 final class CapturerFixtureCommand
@@ -49,7 +50,7 @@ final class CapturerFixtureCommand
     public static function alleger(string $html): string
     {
         $html = (string) preg_replace([
-            '#<script\b[^>]*>.*?</script>#is',
+            '#<script\b(?![^>]*(?:__NEXT_DATA__|application/(?:ld\+)?json))[^>]*>.*?</script>#is',
             '#<style\b[^>]*>.*?</style>#is',
             '#<noscript\b[^>]*>.*?</noscript>#is',
             '#<iframe\b[^>]*>.*?</iframe>#is',

@@ -13,6 +13,7 @@ use App\Entity\Source;
 use App\Enum\RunStatus;
 use App\Repository\DealRepository;
 use App\Repository\SourceRepository;
+use App\Repository\WatchedCreatorRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Clock\ClockInterface;
@@ -42,6 +43,7 @@ class CollecteOrchestrator
         private readonly EventDispatcherInterface $dispatcher,
         private readonly ClockInterface $clock,
         private readonly LoggerInterface $collecteLogger,
+        private readonly WatchedCreatorRepository $createurs,
     ) {
         foreach ($connecteurs as $connecteur) {
             $this->connecteurs[$connecteur->getCode()] = $connecteur;
@@ -98,8 +100,9 @@ class CollecteOrchestrator
         }
 
         $pagesIgnorees = $this->http->getPagesIgnorees();
+        $videNormal = $connecteur instanceof VideAttenduInterface && $connecteur->resultatVideAttendu();
         $statut = match (true) {
-            [] === $dtos => RunStatus::Vide,
+            [] === $dtos && !$videNormal => RunStatus::Vide,
             [] !== $pagesIgnorees => RunStatus::Partiel,
             default => RunStatus::Succes,
         };
@@ -134,7 +137,7 @@ class CollecteOrchestrator
         $vus = [];
 
         foreach ($dtos as $dto) {
-            $hash = $this->hasher->hash($source->getCode(), $dto->url, $dto->titre);
+            $hash = $this->hasher->hash($source->getCode(), $dto->url, $dto->titre, $dto->idExterne);
             if (isset($vus[$hash])) {
                 continue;
             }
@@ -149,6 +152,9 @@ class CollecteOrchestrator
                 ++$misAJour;
             }
             self::appliquer($deal, $dto, $vuLe);
+            if (null !== $dto->createurPseudo) {
+                $deal->setCreateur($this->createurs->findOneBy(['pseudo' => $dto->createurPseudo]));
+            }
         }
 
         return [$nouveaux, $misAJour];

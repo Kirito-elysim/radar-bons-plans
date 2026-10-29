@@ -16,6 +16,7 @@ use App\Collecte\SourceConnectorInterface;
 use App\Enum\RunStatus;
 use App\Repository\DealRepository;
 use App\Repository\SourceRepository;
+use App\Repository\WatchedCreatorRepository;
 use App\Tests\Support\Fixtures;
 use App\Tests\Support\JournalLogger;
 use Doctrine\ORM\EntityManagerInterface;
@@ -74,6 +75,7 @@ final class CollecteOrchestratorTest extends KernelTestCase
             $this->dispatcher,
             $this->clock,
             $this->logger,
+            $c->get(WatchedCreatorRepository::class),
         );
     }
 
@@ -183,8 +185,19 @@ final class CollecteOrchestratorTest extends KernelTestCase
         $this->orchestrateur()->executer('radins');
     }
 
-    public function testLeConnecteurEstEnregistreDansLeConteneur(): void
+    public function testTousLesConnecteursSontEnregistresDansLeConteneur(): void
     {
-        self::assertContains(AntiCriseCatalogueConnector::CODE, self::getContainer()->get(CollecteOrchestrator::class)->codesDisponibles());
+        self::assertEqualsCanonicalizing(
+            ['anti_crise_catalogue', 'anti_crise_remboursement', 'shopmium', 'envie_de_bien_manger', 'radins', 'lien_bio'],
+            self::getContainer()->get(CollecteOrchestrator::class)->codesDisponibles(),
+        );
+    }
+
+    public function testLienBioSansPageConfigureeNEstPasUneAnomalie(): void
+    {
+        $rapport = self::getContainer()->get(CollecteOrchestrator::class)->executer('lien_bio');
+
+        self::assertSame(RunStatus::Succes, $rapport->statut);
+        self::assertSame(0, $rapport->nbRecus);
     }
 }
