@@ -103,7 +103,7 @@ final class CollecteOrchestratorTest extends KernelTestCase
 
         $deals = self::getContainer()->get(DealRepository::class)->findBy(['source' => $source]);
         self::assertCount(361, $deals);
-        $provencia = self::getContainer()->get(DealRepository::class)->findOneBy(['region' => 'Provencia (Sud-Est)', 'enseigne' => 'Carrefour']);
+        $provencia = self::getContainer()->get(DealRepository::class)->findOneBy(['region' => 'paca', 'enseigne' => 'Carrefour', 'descriptionCourte' => 'Provencia']);
         self::assertNotNull($provencia);
         self::assertSame('2026-11-15', $provencia->getDateFin()?->format('Y-m-d'));
         self::assertSame('2026-10-29 07:40', $provencia->getPremiereVueLe()->format('Y-m-d H:i'), 'La date de première vue ne change pas');

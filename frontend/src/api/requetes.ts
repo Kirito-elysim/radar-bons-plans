@@ -25,6 +25,7 @@ export type ParametresRecherche = Partial<
     | 'favoris'
     | 'expireSous'
     | 'tri'
+    | 'toutesRegions'
     | 'page'
     | 'itemsPerPage',
     string
@@ -169,7 +170,12 @@ export function useEnregistrerTikTok() {
 export function useEnregistrerPreferences() {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: (p: Partial<Preferences>) => api<Preferences>('/preferences', 'PATCH', p),
+    mutationFn: (p: Partial<Preferences>) => {
+      // La liste des régions est en lecture seule : inutile de la renvoyer.
+      const corps = { ...p }
+      delete corps.regionsDisponibles
+      return api<Preferences>('/preferences', 'PATCH', corps)
+    },
     onSuccess: (p) => {
       client.setQueryData(cles.preferences, p)
       void client.invalidateQueries({ queryKey: cles.tableauDeBord })

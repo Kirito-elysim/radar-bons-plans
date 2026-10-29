@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\ApiResource;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Patch;
 use App\Entity\UserPreference;
 use App\Enum\NotificationChannel;
+use App\Region\Regions;
 use App\State\PreferencesProcessor;
 use App\State\PreferencesProvider;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -55,6 +57,14 @@ final class Preferences
     #[Assert\Regex(pattern: '/^-?\d{1,20}$/', message: 'Identifiant de discussion Telegram invalide.')]
     public ?string $telegramChatId = null;
 
+    /** Zone (paca, nord…) ; null = catalogues régionaux de toutes les zones. */
+    #[Assert\Choice(callback: [self::class, 'codesRegions'], message: 'Région inconnue.')]
+    public ?string $region = Regions::DEFAUT;
+
+    /** @var list<array{code: string, libelle: string}> */
+    #[ApiProperty(writable: false)]
+    public array $regionsDisponibles = [];
+
     /**
      * @return list<string>
      */
@@ -63,9 +73,21 @@ final class Preferences
         return array_map(static fn (NotificationChannel $c): string => $c->value, NotificationChannel::cases());
     }
 
+    /**
+     * @return list<string>
+     */
+    public static function codesRegions(): array
+    {
+        return array_keys(Regions::ZONES);
+    }
+
     public static function depuis(UserPreference $p): self
     {
         $r = new self();
+        $r->region = $p->getRegion();
+        foreach (Regions::ZONES as $code => $libelle) {
+            $r->regionsDisponibles[] = ['code' => $code, 'libelle' => $libelle];
+        }
         $r->enseignesSuivies = $p->getEnseignesSuivies();
         $r->categories = $p->getCategories();
         $r->seuilAlerteJours = $p->getSeuilAlerteJours();

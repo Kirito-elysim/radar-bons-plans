@@ -7,6 +7,7 @@ namespace App\Api;
 use App\ApiResource\BonPlan;
 use App\Entity\Deal;
 use App\Entity\User;
+use App\Region\Regions;
 use App\Repository\FavoriteRepository;
 
 /**
@@ -62,6 +63,7 @@ final class BonPlanMapper
         $b->urgence = self::urgence($b->joursRestants);
         $b->exclusifAppli = $d->isExclusifAppli();
         $b->region = $d->getRegion();
+        $b->regionLibelle = Regions::libelle($d->getRegion());
         $b->url = $d->getUrl();
         $b->imageUrl = $d->getImageUrl();
         $b->sourceCode = $d->getSource()->getCode();

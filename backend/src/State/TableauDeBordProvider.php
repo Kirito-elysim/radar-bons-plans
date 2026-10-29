@@ -37,19 +37,20 @@ final class TableauDeBordProvider implements ProviderInterface
         $user = $this->utilisateur->get();
         $aujourdhui = $this->clock->now();
         $t = new TableauDeBord();
+        $zone = $user->getPreference()->getRegion();
 
-        $t->finissentSous3Jours = $this->deals->compter(new CriteresBonsPlans(expireSousJours: BonPlanMapper::SEUIL_CRITIQUE), $aujourdhui);
-        $t->finissentSous7Jours = $this->deals->compter(new CriteresBonsPlans(expireSousJours: BonPlanMapper::SEUIL_PROCHE), $aujourdhui);
+        $t->finissentSous3Jours = $this->deals->compter(new CriteresBonsPlans(expireSousJours: BonPlanMapper::SEUIL_CRITIQUE, zone: $zone), $aujourdhui);
+        $t->finissentSous7Jours = $this->deals->compter(new CriteresBonsPlans(expireSousJours: BonPlanMapper::SEUIL_PROCHE, zone: $zone), $aujourdhui);
         $t->rembourses100EnCours = $this->deals->compterRembourse100EnCours($aujourdhui);
-        $t->nouveauxDepuisHier = $this->deals->compter(new CriteresBonsPlans(nouveaux: true), $aujourdhui);
+        $t->nouveauxDepuisHier = $this->deals->compter(new CriteresBonsPlans(nouveaux: true, zone: $zone), $aujourdhui);
         $t->economiePotentielle = $this->deals->sommeValeurEnCours($aujourdhui);
         $t->economiesMois = $this->savings->total($user, $aujourdhui->modify('first day of this month'), $aujourdhui);
         $t->economiesTotal = $this->savings->total($user);
         foreach (DealType::cases() as $type) {
-            $t->parType[$type->value] = $this->deals->compter(new CriteresBonsPlans(types: [$type]), $aujourdhui);
+            $t->parType[$type->value] = $this->deals->compter(new CriteresBonsPlans(types: [$type], zone: $zone), $aujourdhui);
         }
 
-        $resultat = $this->deals->rechercher(new CriteresBonsPlans(expireSousJours: BonPlanMapper::SEUIL_PROCHE), $aujourdhui, 0, 200);
+        $resultat = $this->deals->rechercher(new CriteresBonsPlans(expireSousJours: BonPlanMapper::SEUIL_PROCHE, zone: $zone), $aujourdhui, 0, 200);
         $bonsPlans = $this->mapper->versRessources($resultat['elements'], $user, $aujourdhui);
         $pref = $user->getPreference();
         // Priorité : favoris, puis enseignes suivies, puis date de fin.

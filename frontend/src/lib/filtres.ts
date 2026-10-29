@@ -9,6 +9,8 @@ export interface Filtres {
   favoris: boolean
   /** Uniquement ce qui se termine sous 7 jours. */
   bientot: boolean
+  /** Inclure les catalogues régionaux des autres zones que la mienne. */
+  toutesRegions: boolean
   tri: 'dateFin' | 'recents' | 'valeur'
 }
 
@@ -20,5 +22,6 @@ export const FILTRES_VIDES: Filtres = {
   nouveau: false,
   favoris: false,
   bientot: false,
+  toutesRegions: false,
   tri: 'dateFin',
 }

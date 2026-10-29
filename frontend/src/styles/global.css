@@ -1180,3 +1180,13 @@ select {
 .apercu-recap h4 {
   margin: 0.4rem 0 0.2rem;
 }
+
+.selecteur {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 0.8rem;
+  border-radius: var(--rayon-petit);
+  border: 1px solid var(--trait);
+  background: var(--papier);
+  font-size: 1rem;
+}

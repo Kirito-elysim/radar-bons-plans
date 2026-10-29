@@ -24,7 +24,9 @@ export interface BonPlan {
   joursRestants: number | null
   urgence: Urgence
   exclusifAppli: boolean
+  /** Codes de zones d'un catalogue régional, null = national. */
   region: string | null
+  regionLibelle: string | null
   url: string
   imageUrl: string | null
   sourceCode: string
@@ -88,6 +90,9 @@ export interface Preferences {
   alertesRembourse100: boolean
   alertesNouveauCatalogue: boolean
   telegramChatId: string | null
+  /** Zone (paca…), null = toutes les régions. */
+  region: string | null
+  regionsDisponibles: { code: string; libelle: string }[]
 }
 
 export interface Profil {

@@ -83,9 +83,37 @@ final class AntiCriseCatalogueConnectorTest extends TestCase
         self::assertSame('Catalogue Carrefour — Provencia', $deal->titre);
         self::assertSame('Carrefour', $deal->enseigne);
         self::assertSame('Provencia', $deal->descriptionCourte);
-        self::assertSame('Provencia (Sud-Est)', $deal->region);
+        self::assertSame('paca', $deal->region);
         self::assertSame('2026-11-04', $deal->dateDebut?->format('Y-m-d'));
         self::assertSame('2026-11-15', $deal->dateFin?->format('Y-m-d'));
+    }
+
+    public function testCataloguesRegionauxDeLaPageReelle(): void
+    {
+        $deals = $this->parserFixture('catalogues.html');
+        $region = static function (string $intitule) use ($deals): ?string {
+            foreach ($deals as $d) {
+                if ($d->descriptionCourte === $intitule) {
+                    return $d->region;
+                }
+            }
+            self::fail('Catalogue absent : '.$intitule);
+        };
+
+        self::assertSame('paca', $region('Exclus PACA'));
+        self::assertSame('nord-est', $region('Exclus Nord-Est'));
+        self::assertSame('bretagne-normandie', $region('Exclus Bretagne Normandie'));
+        self::assertSame('sud-ouest', $region('Exclus Sud-Ouest'));
+        self::assertSame('idf', $region('Exclus IDF'));
+        self::assertSame('paca', $region('Sud-Est viande'));
+        self::assertSame('paca,occitanie,sud-ouest', $region('Sud foire au gras'));
+        self::assertNull($region('Estissac'), 'Nom de ville, pas « Est »');
+        self::assertNull($region('La Pacaudière'), 'Pas « PACA »');
+        self::assertNull($region('Promos'), 'National');
+
+        $regionaux = array_filter($deals, static fn (DealDTO $d): bool => null !== $d->region);
+        self::assertGreaterThan(40, \count($regionaux));
+        self::assertLessThan(80, \count($regionaux));
     }
 
     public function testCatalogueIssuDuCarrousel(): void

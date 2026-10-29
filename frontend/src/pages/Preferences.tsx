@@ -54,6 +54,28 @@ function FormulairePreferences({ initiales }: { initiales: Prefs }) {
 
       <form onSubmit={envoyer} className="formulaire">
         <fieldset className="carte-formulaire bloc">
+          <legend>Ma région</legend>
+          <p className="texte-doux">
+            Les catalogues régionaux («&nbsp;Exclus PACA&nbsp;», «&nbsp;Provencia&nbsp;», «&nbsp;Nord&nbsp;»…)
+            des autres régions sont masqués du tableau de bord, des alertes et du récap.
+          </p>
+          <select
+            className="selecteur"
+            value={p.region ?? ''}
+            onChange={(e) => modifier({ region: e.target.value || null })}
+            aria-label="Ma région"
+          >
+            {p.regionsDisponibles.map((r) => (
+              <option key={r.code} value={r.code}>
+                {r.libelle}
+              </option>
+            ))}
+            <option value="">Toutes les régions</option>
+          </select>
+          {erreur?.pour('region') && <small className="erreur">{erreur.pour('region')}</small>}
+        </fieldset>
+
+        <fieldset className="carte-formulaire bloc">
           <legend>Enseignes suivies</legend>
           <p className="texte-doux">Alerte « nouveau catalogue » et priorité dans le bandeau.</p>
           <div className="puces puces--multiligne">

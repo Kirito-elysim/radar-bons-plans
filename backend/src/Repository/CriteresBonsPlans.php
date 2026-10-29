@@ -33,10 +33,13 @@ final class CriteresBonsPlans
         /** Uniquement ceux qui finissent dans N jours au plus. */
         public ?int $expireSousJours = null,
         public bool $inclureExpires = false,
+        /** Uniquement les catalogues régionaux de cette zone (filtre explicite). */
         public ?string $region = null,
         public string $tri = self::TRI_DATE_FIN,
         /** @var list<int>|null restreint à ces identifiants (ex. favoris) */
         public ?array $ids = null,
+        /** Zone de l'utilisateur : exclut les catalogues régionaux des autres zones (null = toutes). */
+        public ?string $zone = null,
     ) {
     }
 }

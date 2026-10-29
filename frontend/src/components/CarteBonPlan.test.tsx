@@ -26,6 +26,7 @@ const bonPlan: BonPlan = {
   urgence: 'critique',
   exclusifAppli: false,
   region: null,
+  regionLibelle: null,
   url: 'https://anti-crise.fr/les-offres-de-remboursement/candia/',
   imageUrl: null,
   sourceCode: 'anti_crise_remboursement',

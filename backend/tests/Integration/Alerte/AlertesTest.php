@@ -114,6 +114,22 @@ final class AlertesTest extends AlerteTestCase
         self::assertSame('🗞️ Nouveau catalogue Lidl', $this->emails()[1]->getSubject());
     }
 
+    public function testPasDAlertePourLeCatalogueDUneAutreRegion(): void
+    {
+        $user = $this->utilisateur();
+        $user->getPreference()->setEnseignesSuivies(['Carrefour']);
+        $this->em()->flush();
+        $this->deal('Exclus Nord', 6, DealType::Catalogue, enseigne: 'Carrefour', vuIlYA: '2 hours')->setRegion('nord');
+        $this->deal('Exclus PACA', 6, DealType::Catalogue, enseigne: 'Carrefour', vuIlYA: '2 hours')->setRegion('paca');
+        $this->em()->flush();
+
+        self::getContainer()->get(NouveauCatalogueAlerteService::class)->executer();
+
+        self::assertSame('🗞️ Nouveau catalogue Carrefour', $this->emails()[0]->getSubject());
+        self::assertStringContainsString('Exclus PACA', (string) $this->emails()[0]->getTextBody());
+        self::assertStringNotContainsString('Exclus Nord', (string) $this->emails()[0]->getTextBody());
+    }
+
     public function testSansEnseigneSuivieAucuneAlerteCatalogue(): void
     {
         $this->utilisateur();

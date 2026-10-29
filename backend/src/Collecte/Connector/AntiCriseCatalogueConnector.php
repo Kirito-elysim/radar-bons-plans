@@ -11,6 +11,7 @@ use App\Collecte\Http\PoliteHttpClient;
 use App\Collecte\Parsing\FrenchDateParser;
 use App\Collecte\SourceConnectorInterface;
 use App\Enum\DealType;
+use App\Region\Regions;
 use Symfony\Component\DomCrawler\Crawler;
 
 /**
@@ -31,11 +32,6 @@ final class AntiCriseCatalogueConnector implements SourceConnectorInterface
     public const ENSEIGNES_PRIORITAIRES = [
         'Carrefour', 'Carrefour Market', 'Intermarché', 'Leclerc', 'Lidl',
         'Auchan', 'Super U', 'Aldi', 'Netto', 'Action',
-    ];
-
-    /** Intitulés correspondant à une déclinaison régionale. */
-    private const REGIONS = [
-        'provencia' => 'Provencia (Sud-Est)',
     ];
 
     public function __construct(
@@ -230,15 +226,14 @@ final class AntiCriseCatalogueConnector implements SourceConnectorInterface
         return null !== $intitule ? $titre.' — '.$intitule : $titre;
     }
 
+    /**
+     * Zones d'un catalogue régional (« Exclus PACA », « Provencia », « Nord »…), null si national.
+     * Sans intitulé (carrousel), on regarde la fin de l'URL après l'année (« …-2026-provencia/ »).
+     */
     private static function region(?string $intitule, string $url): ?string
     {
-        $cible = mb_strtolower(($intitule ?? '').' '.$url);
-        foreach (self::REGIONS as $motCle => $region) {
-            if (str_contains($cible, $motCle)) {
-                return $region;
-            }
-        }
+        $suffixe = preg_match('#-20\d{2}-([a-z0-9-]+)/?$#', $url, $m) ? $m[1] : '';
 
-        return null;
+        return Regions::detecter(($intitule ?? '').' '.$suffixe);
     }
 }

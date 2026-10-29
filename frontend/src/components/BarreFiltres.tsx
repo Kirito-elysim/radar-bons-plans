@@ -34,6 +34,7 @@ export function BarreFiltres({ filtres, categories, enseignesSuivies, onChange }
     filtres.nouveau ||
     filtres.favoris ||
     filtres.bientot ||
+    filtres.toutesRegions ||
     filtres.section
 
   return (
@@ -126,6 +127,17 @@ export function BarreFiltres({ filtres, categories, enseignesSuivies, onChange }
             onChange={(e) => onChange({ ...filtres, favoris: e.target.checked })}
           />
           Mes favoris
+        </label>
+        <label
+          className="interrupteur"
+          title="Afficher aussi les catalogues « Exclus Nord », « IDF »… des autres régions"
+        >
+          <input
+            type="checkbox"
+            checked={filtres.toutesRegions}
+            onChange={(e) => onChange({ ...filtres, toutesRegions: e.target.checked })}
+          />
+          Toutes les régions
         </label>
         {actifs && (
           <button type="button" className="bouton-lien" onClick={() => onChange(FILTRES_VIDES)}>

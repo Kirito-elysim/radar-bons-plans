@@ -29,7 +29,8 @@ use App\State\BonPlanProvider;
                 'q' => new QueryParameter(description: 'Recherche texte (titre, marque, enseigne, description)', schema: ['type' => 'string']),
                 'expireSous' => new QueryParameter(description: 'Se termine dans N jours au plus', schema: ['type' => 'integer', 'minimum' => 0]),
                 'favoris' => new QueryParameter(description: 'Uniquement mes favoris', schema: ['type' => 'boolean']),
-                'region' => new QueryParameter(description: 'Déclinaison régionale, ex. « Provencia (Sud-Est) »', schema: ['type' => 'string']),
+                'region' => new QueryParameter(description: 'Uniquement les catalogues régionaux de cette zone (paca, nord…)', schema: ['type' => 'string']),
+                'toutesRegions' => new QueryParameter(description: 'Inclure les catalogues régionaux des autres zones que la mienne', schema: ['type' => 'boolean']),
                 'inclureExpires' => new QueryParameter(description: 'Inclure les offres terminées', schema: ['type' => 'boolean']),
                 'tri' => new QueryParameter(description: 'dateFin (défaut), recents, valeur', schema: ['type' => 'string', 'enum' => ['dateFin', 'recents', 'valeur']]),
             ],
@@ -66,7 +67,9 @@ final class BonPlan
     /** « critique » (≤ 3 jours), « proche » (≤ 7 jours) ou null. */
     public ?string $urgence = null;
     public bool $exclusifAppli = false;
+    /** Codes de zones d'un catalogue régional (« paca », « paca,occitanie,sud-ouest »), null = national. */
     public ?string $region = null;
+    public ?string $regionLibelle = null;
     /** Lien vers la source : l'application ne recopie pas le contenu. */
     public string $url;
     public ?string $imageUrl = null;

@@ -41,7 +41,7 @@ final class RecapQuotidienBuilder
     {
         $pref = $user->getPreference();
         $depuis = $maintenant->modify('-24 hours');
-        $nouveaux = $this->deals->findNouveauxDepuis($depuis, $maintenant);
+        $nouveaux = $this->deals->findNouveauxDepuis($depuis, $maintenant, zone: $pref->getRegion());
 
         $catalogues = array_filter($nouveaux, static fn (Deal $d): bool => DealType::Catalogue === $d->getType());
         // Les enseignes suivies d'abord ; sans enseigne suivie, tous les catalogues.
@@ -90,7 +90,7 @@ final class RecapQuotidienBuilder
      */
     private function expirentBientot(User $user, \DateTimeImmutable $maintenant): array
     {
-        $proches = $this->deals->rechercher(new CriteresBonsPlans(expireSousJours: 3), $maintenant, 0, 500)['elements'];
+        $proches = $this->deals->rechercher(new CriteresBonsPlans(expireSousJours: 3, zone: $user->getPreference()->getRegion()), $maintenant, 0, 500)['elements'];
         if ([] === $proches) {
             return [];
         }

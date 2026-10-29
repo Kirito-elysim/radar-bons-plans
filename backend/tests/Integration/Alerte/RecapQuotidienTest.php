@@ -43,6 +43,7 @@ final class RecapQuotidienTest extends AlerteTestCase
         $user->getPreference()->setEnseignesSuivies(['Lidl']);
         $this->deal('Catalogue Lidl', 6, DealType::Catalogue, enseigne: 'Lidl', vuIlYA: '3 hours');
         $this->deal('Catalogue Aldi', 6, DealType::Catalogue, enseigne: 'Aldi', vuIlYA: '3 hours');
+        $this->deal('Lidl Exclus Nord', 6, DealType::Catalogue, enseigne: 'Lidl', vuIlYA: '3 hours')->setRegion('nord');
         $this->deal('Lessive 100 %', 20, sousType: RemboursementType::Rembourse100, valeur: '8.99', vuIlYA: '2 hours');
         $this->deal('Yaourts 100 % bientôt finis', 2, sousType: RemboursementType::Rembourse100, vuIlYA: '20 days');
         $this->deal('ODR TV', 30, valeur: '100.00', vuIlYA: '1 hour');
@@ -65,6 +66,7 @@ final class RecapQuotidienTest extends AlerteTestCase
         self::assertStringContainsString('NOUVEAUX CATALOGUES', $texte);
         self::assertStringContainsString('Catalogue Lidl', $texte);
         self::assertStringNotContainsString('Catalogue Aldi', $texte, 'Enseigne non suivie');
+        self::assertStringNotContainsString('Lidl Exclus Nord', $texte, 'Autre région que PACA');
         self::assertStringContainsString('NOUVELLES OFFRES 100 % REMBOURSÉES', $texte);
         self::assertStringContainsString('SE TERMINENT SOUS 3 JOURS', $texte);
         self::assertStringContainsString('Yaourts 100 % bientôt finis', $texte);

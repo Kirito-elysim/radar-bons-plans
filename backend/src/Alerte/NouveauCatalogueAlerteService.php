@@ -11,6 +11,7 @@ use App\Enum\TypeAlerte;
 use App\Notification\LigneAlerte;
 use App\Notification\MessageAlerte;
 use App\Notification\Notificateur;
+use App\Region\Regions;
 use App\Repository\DealRepository;
 use App\Repository\UserRepository;
 use Symfony\Component\Clock\ClockInterface;
@@ -48,7 +49,10 @@ final class NouveauCatalogueAlerteService
             if (!$pref->isAlertesNouveauCatalogue() || [] === $pref->getEnseignesSuivies()) {
                 continue;
             }
-            $concernes = array_values(array_filter($nouveaux, static fn (Deal $d): bool => $pref->suitEnseigne($d->getEnseigne())));
+            $concernes = array_values(array_filter(
+                $nouveaux,
+                static fn (Deal $d): bool => $pref->suitEnseigne($d->getEnseigne()) && Regions::couvre($d->getRegion(), $pref->getRegion()),
+            ));
             if ([] === $concernes) {
                 continue;
             }

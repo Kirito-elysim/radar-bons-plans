@@ -146,10 +146,13 @@ class DealRepository extends ServiceEntityRepository
      *
      * @return list<Deal>
      */
-    public function findDebutOuFinEntre(\DateTimeImmutable $du, \DateTimeImmutable $au): array
+    public function findDebutOuFinEntre(\DateTimeImmutable $du, \DateTimeImmutable $au, ?string $zone = null): array
     {
+        $qb = $this->createQueryBuilder('d');
+        self::filtrerZone($qb, $zone);
+
         /** @var list<Deal> */
-        return $this->createQueryBuilder('d')
+        return $qb
             ->addSelect('s')
             ->join('d.source', 's')
             ->andWhere('(d.dateDebut BETWEEN :du AND :au) OR (d.dateFin BETWEEN :du AND :au)')
@@ -158,6 +161,16 @@ class DealRepository extends ServiceEntityRepository
             ->orderBy('d.dateFin', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Garde les bons plans nationaux et ceux de la zone ; écarte les catalogues régionaux des autres zones.
+     */
+    private static function filtrerZone(QueryBuilder $qb, ?string $zone): void
+    {
+        if (null !== $zone) {
+            $qb->andWhere("d.region IS NULL OR CONCAT(',', d.region, ',') LIKE :zone")->setParameter('zone', '%,'.$zone.',%');
+        }
     }
 
     private function requeteRecherche(CriteresBonsPlans $c, \DateTimeImmutable $aujourdhui): QueryBuilder
@@ -199,8 +212,9 @@ class DealRepository extends ServiceEntityRepository
                 ->setParameter('jourLimite', $jour->modify(\sprintf('+%d days', max(0, $c->expireSousJours))), Types::DATE_IMMUTABLE);
         }
         if (null !== $c->region) {
-            $qb->andWhere('d.region = :region')->setParameter('region', $c->region);
+            $qb->andWhere("CONCAT(',', d.region, ',') LIKE :region")->setParameter('region', '%,'.$c->region.',%');
         }
+        self::filtrerZone($qb, $c->zone);
         if (null !== $c->ids) {
             $qb->andWhere('d.id IN (:ids)')->setParameter('ids', [] !== $c->ids ? $c->ids : [0]);
         }
@@ -239,7 +253,7 @@ class DealRepository extends ServiceEntityRepository
      *
      * @return list<Deal>
      */
-    public function findNouveauxDepuis(\DateTimeImmutable $depuis, \DateTimeImmutable $aujourdhui, ?DealType $type = null, ?RemboursementType $sousType = null): array
+    public function findNouveauxDepuis(\DateTimeImmutable $depuis, \DateTimeImmutable $aujourdhui, ?DealType $type = null, ?RemboursementType $sousType = null, ?string $zone = null): array
     {
         $qb = $this->createQueryBuilder('d')
             ->andWhere('d.premiereVueLe >= :depuis')
@@ -255,6 +269,7 @@ class DealRepository extends ServiceEntityRepository
         if (null !== $sousType) {
             $qb->andWhere('d.sousType = :sousType')->setParameter('sousType', $sousType);
         }
+        self::filtrerZone($qb, $zone);
 
         /** @var list<Deal> */
         return $qb->getQuery()->getResult();

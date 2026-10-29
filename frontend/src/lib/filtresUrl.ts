@@ -13,6 +13,7 @@ export function filtresDepuisUrl(p: URLSearchParams): Filtres {
     nouveau: p.get('nouveau') === '1',
     favoris: p.get('favoris') === '1',
     bientot: p.get('urgence') === '1',
+    toutesRegions: p.get('regions') === 'toutes',
     tri: tri === 'recents' || tri === 'valeur' ? tri : 'dateFin',
   }
 }
@@ -26,6 +27,7 @@ export function filtresVersUrl(f: Filtres): URLSearchParams {
   if (f.nouveau) p.set('nouveau', '1')
   if (f.favoris) p.set('favoris', '1')
   if (f.bientot) p.set('urgence', '1')
+  if (f.toutesRegions) p.set('regions', 'toutes')
   if (f.tri !== FILTRES_VIDES.tri) p.set('tri', f.tri)
   return p
 }
@@ -40,6 +42,7 @@ export function parametresSection(section: Section, f: Filtres): ParametresReche
     nouveau: f.nouveau ? '1' : undefined,
     favoris: f.favoris ? '1' : undefined,
     expireSous: f.bientot ? '7' : undefined,
+    toutesRegions: f.toutesRegions ? '1' : undefined,
     tri: f.tri === 'dateFin' ? undefined : f.tri,
   }
 }

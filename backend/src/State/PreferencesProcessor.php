@@ -35,6 +35,7 @@ final class PreferencesProcessor implements ProcessorInterface
             ->setRecapActif($data->recapActif)
             ->setAlertesRembourse100($data->alertesRembourse100)
             ->setAlertesNouveauCatalogue($data->alertesNouveauCatalogue)
+            ->setRegion(null !== $data->region && '' !== $data->region ? $data->region : null)
             ->setTelegramChatId(null !== $data->telegramChatId && '' !== $data->telegramChatId ? $data->telegramChatId : null);
         $this->em->persist($pref);
         $this->em->flush();

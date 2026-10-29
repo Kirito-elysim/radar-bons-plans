@@ -33,7 +33,7 @@ export function CarteBonPlan({ bonPlan: b, compacte = false }: { bonPlan: BonPla
           {b.sousTypeLibelle && !valeur?.includes('remboursé') && <li>{b.sousTypeLibelle}</li>}
           {b.categorie && !compacte && <li>{b.categorie}</li>}
           {b.condition && <li>{b.condition}</li>}
-          {b.region && <li>{b.region}</li>}
+          {b.regionLibelle && <li>{b.regionLibelle}</li>}
           {b.exclusifAppli && <li>Exclusif appli</li>}
           {b.createur && <li>@{b.createur}</li>}
           {b.nouveau && <li className="carte__nouveau">Nouveau</li>}

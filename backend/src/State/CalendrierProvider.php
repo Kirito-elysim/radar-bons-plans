@@ -7,6 +7,7 @@ namespace App\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Api\Filtres;
+use App\Api\UtilisateurCourant;
 use App\ApiResource\Calendrier;
 use App\Entity\Deal;
 use App\Enum\DealType;
@@ -21,6 +22,7 @@ final class CalendrierProvider implements ProviderInterface
     public function __construct(
         private readonly DealRepository $deals,
         private readonly ClockInterface $clock,
+        private readonly UtilisateurCourant $utilisateur,
     ) {
     }
 
@@ -36,7 +38,7 @@ final class CalendrierProvider implements ProviderInterface
 
         $c = new Calendrier();
         $c->mois = $debut->format('Y-m');
-        foreach ($this->deals->findDebutOuFinEntre($debut, $fin) as $deal) {
+        foreach ($this->deals->findDebutOuFinEntre($debut, $fin, $this->utilisateur->get()->getPreference()->getRegion()) as $deal) {
             if ([] !== $types && !\in_array($deal->getType(), $types, true)) {
                 continue;
             }

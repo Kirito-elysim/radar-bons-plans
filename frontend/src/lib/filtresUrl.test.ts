@@ -12,6 +12,7 @@ describe('filtres dans l’URL', () => {
       q: 'lessive',
       nouveau: true,
       bientot: true,
+      toutesRegions: true,
       tri: 'valeur' as const,
     }
     expect(filtresDepuisUrl(filtresVersUrl(f))).toEqual(f)

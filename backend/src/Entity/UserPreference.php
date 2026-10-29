@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Enum\NotificationChannel;
+use App\Region\Regions;
 use App\Repository\UserPreferenceRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -59,6 +60,10 @@ class UserPreference
 
     #[ORM\Column(length: 64, nullable: true)]
     private ?string $telegramChatId = null;
+
+    /** Zone de l'utilisateur (voir Regions) ; null = afficher les catalogues de toutes les régions. */
+    #[ORM\Column(length: 32, nullable: true, options: ['default' => Regions::DEFAUT])]
+    private ?string $region = Regions::DEFAUT;
 
     public function __construct(User $user)
     {
@@ -234,6 +239,21 @@ class UserPreference
     public function setTelegramChatId(?string $telegramChatId): static
     {
         $this->telegramChatId = $telegramChatId;
+
+        return $this;
+    }
+
+    public function getRegion(): ?string
+    {
+        return $this->region;
+    }
+
+    public function setRegion(?string $region): static
+    {
+        if (null !== $region && !Regions::existe($region)) {
+            throw new \InvalidArgumentException(\sprintf('Région inconnue : « %s ».', $region));
+        }
+        $this->region = $region;
 
         return $this;
     }

@@ -46,9 +46,14 @@ final class BonPlanProvider implements ProviderInterface
             return null !== $deal ? $this->mapper->versRessourceUnique($deal, $user, $aujourdhui) : null;
         }
 
-        $criteres = $this->criteres(new Filtres($context));
-        if (null !== $user && (new Filtres($context))->booleen('favoris')) {
+        $filtres = new Filtres($context);
+        $criteres = $this->criteres($filtres);
+        if (null !== $user && $filtres->booleen('favoris')) {
             $criteres->ids = array_keys($this->favoris->idsDealsFavoris($user));
+        }
+        // Catalogues régionaux : seulement ceux de la zone de l'utilisateur, sauf ?toutesRegions=1.
+        if (null !== $user && !$filtres->booleen('toutesRegions')) {
+            $criteres->zone = $user->getPreference()->getRegion();
         }
 
         $page = $this->pagination->getPage($context);

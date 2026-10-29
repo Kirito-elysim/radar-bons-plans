@@ -20,6 +20,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'idx_deal_type_expire', columns: ['type', 'expire'])]
 #[ORM\Index(name: 'idx_deal_enseigne', columns: ['enseigne'])]
 #[ORM\Index(name: 'idx_deal_premiere_vue', columns: ['premiere_vue_le'])]
+#[ORM\Index(name: 'idx_deal_region', columns: ['region'])]
 #[ORM\HasLifecycleCallbacks]
 class Deal
 {
@@ -80,7 +81,7 @@ class Deal
     #[ORM\Column(options: ['default' => false])]
     private bool $exclusifAppli = false;
 
-    /** Déclinaison régionale éventuelle (ex. « Provencia Sud-Est »). */
+    /** Zones d'un catalogue régional, codes séparés par des virgules (voir Regions) ; null = national. */
     #[ORM\Column(length: 80, nullable: true)]
     private ?string $region = null;
 
