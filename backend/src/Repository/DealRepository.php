@@ -7,6 +7,8 @@ namespace App\Repository;
 use App\Entity\Deal;
 use App\Enum\RemboursementType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -108,5 +110,109 @@ class DealRepository extends ServiceEntityRepository
         )
             ->setParameter('limite', $limite, Types::DATE_IMMUTABLE)
             ->execute();
+    }
+
+    /**
+     * Recherche paginée.
+     *
+     * @return array{elements: list<Deal>, total: int}
+     */
+    public function rechercher(CriteresBonsPlans $c, \DateTimeImmutable $aujourdhui, int $offset = 0, int $limite = 30): array
+    {
+        $qb = $this->requeteRecherche($c, $aujourdhui)
+            ->setFirstResult($offset)
+            ->setMaxResults($limite);
+
+        $paginator = new Paginator($qb->getQuery(), fetchJoinCollection: false);
+        /** @var list<Deal> $elements */
+        $elements = iterator_to_array($paginator->getIterator(), false);
+
+        return ['elements' => $elements, 'total' => \count($paginator)];
+    }
+
+    public function compter(CriteresBonsPlans $c, \DateTimeImmutable $aujourdhui): int
+    {
+        return (int) $this->requeteRecherche($c, $aujourdhui)
+            ->select('COUNT(d.id)')
+            ->resetDQLPart('orderBy')
+            ->resetDQLPart('join')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Bons plans dont le début ou la fin tombe dans l'intervalle (calendrier).
+     *
+     * @return list<Deal>
+     */
+    public function findDebutOuFinEntre(\DateTimeImmutable $du, \DateTimeImmutable $au): array
+    {
+        /** @var list<Deal> */
+        return $this->createQueryBuilder('d')
+            ->addSelect('s')
+            ->join('d.source', 's')
+            ->andWhere('(d.dateDebut BETWEEN :du AND :au) OR (d.dateFin BETWEEN :du AND :au)')
+            ->setParameter('du', $du->setTime(0, 0), Types::DATE_IMMUTABLE)
+            ->setParameter('au', $au->setTime(0, 0), Types::DATE_IMMUTABLE)
+            ->orderBy('d.dateFin', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    private function requeteRecherche(CriteresBonsPlans $c, \DateTimeImmutable $aujourdhui): QueryBuilder
+    {
+        $jour = $aujourdhui->setTime(0, 0);
+        $qb = $this->createQueryBuilder('d')
+            ->addSelect('s')
+            ->join('d.source', 's');
+
+        if (!$c->inclureExpires) {
+            $qb->andWhere('d.expire = false')
+                ->andWhere('d.dateFin IS NULL OR d.dateFin >= :jour')
+                ->setParameter('jour', $jour, Types::DATE_IMMUTABLE);
+        }
+        if ([] !== $c->enseignes) {
+            // L'enseigne peut être portée par « enseigne » (catalogues…) ou « marque » (remboursements, bons).
+            $qb->andWhere('LOWER(d.enseigne) IN (:enseignes) OR LOWER(d.marque) IN (:enseignes)')
+                ->setParameter('enseignes', array_map('mb_strtolower', $c->enseignes));
+        }
+        if ([] !== $c->types) {
+            $qb->andWhere('d.type IN (:types)')->setParameter('types', $c->types);
+        }
+        if ([] !== $c->sousTypes) {
+            $qb->andWhere('d.sousType IN (:sousTypes)')->setParameter('sousTypes', $c->sousTypes);
+        }
+        if ([] !== $c->categories) {
+            $qb->andWhere('LOWER(d.categorie) IN (:categories)')->setParameter('categories', array_map('mb_strtolower', $c->categories));
+        }
+        if ($c->nouveaux) {
+            $qb->andWhere('d.premiereVueLe >= :hier')->setParameter('hier', $jour->modify('-1 day'));
+        }
+        if (null !== $c->texte && '' !== trim($c->texte)) {
+            $qb->andWhere('LOWER(d.titre) LIKE :texte OR LOWER(d.marque) LIKE :texte OR LOWER(d.enseigne) LIKE :texte OR LOWER(d.descriptionCourte) LIKE :texte')
+                ->setParameter('texte', '%'.addcslashes(mb_strtolower(trim($c->texte)), '%_').'%');
+        }
+        if (null !== $c->expireSousJours) {
+            $qb->andWhere('d.dateFin BETWEEN :jourDebut AND :jourLimite')
+                ->setParameter('jourDebut', $jour, Types::DATE_IMMUTABLE)
+                ->setParameter('jourLimite', $jour->modify(\sprintf('+%d days', max(0, $c->expireSousJours))), Types::DATE_IMMUTABLE);
+        }
+        if (null !== $c->region) {
+            $qb->andWhere('d.region = :region')->setParameter('region', $c->region);
+        }
+        if (null !== $c->ids) {
+            $qb->andWhere('d.id IN (:ids)')->setParameter('ids', [] !== $c->ids ? $c->ids : [0]);
+        }
+
+        // DQL ne connaît pas « NULLS LAST » : on trie d'abord sur un indicateur caché.
+        match ($c->tri) {
+            CriteresBonsPlans::TRI_RECENTS => $qb->orderBy('d.premiereVueLe', 'DESC'),
+            CriteresBonsPlans::TRI_VALEUR => $qb->addSelect('CASE WHEN d.valeurEuros IS NULL THEN 1 ELSE 0 END AS HIDDEN sansValeur')
+                ->orderBy('sansValeur', 'ASC')->addOrderBy('d.valeurEuros', 'DESC'),
+            default => $qb->addSelect('CASE WHEN d.dateFin IS NULL THEN 1 ELSE 0 END AS HIDDEN sansFin')
+                ->orderBy('sansFin', 'ASC')->addOrderBy('d.dateFin', 'ASC'),
+        };
+
+        return $qb->addOrderBy('d.id', 'ASC');
     }
 }

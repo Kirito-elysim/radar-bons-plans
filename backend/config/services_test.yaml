@@ -1,5 +1,0 @@
-# Services rendus publics pour les tests d'intégration (pas encore injectés ailleurs).
-services:
-    App\Social\SaisieVideoService:
-        autowire: true
-        public: true

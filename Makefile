@@ -2,7 +2,7 @@
 DC  = docker compose
 PHP = $(DC) run --rm php
 
-.PHONY: up down sh migrate migrate-test test phpstan qa collecte
+.PHONY: up down sh migrate migrate-test test phpstan qa collecte jwt utilisateur
 
 up: ## Démarre PostgreSQL
 	$(DC) up -d postgres
@@ -29,3 +29,9 @@ qa: test phpstan
 
 collecte: ## Lance la collecte (make collecte SOURCE=anti_crise_catalogue ARGS=--dry-run)
 	$(PHP) bin/console app:collecte $(SOURCE) $(ARGS)
+
+jwt: ## Génère les clés JWT (si absentes)
+	$(PHP) bin/console lexik:jwt:generate-keypair --skip-if-exists
+
+utilisateur: ## Crée un compte (make utilisateur EMAIL=moi@exemple.fr ADMIN=--admin)
+	$(DC) run --rm -it php bin/console app:utilisateur:creer $(EMAIL) $(ADMIN)

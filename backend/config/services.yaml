@@ -35,3 +35,10 @@ services:
             $client: '@collecte.client'
             $cache: '@cache.collecte'
             $userAgent: '%env(COLLECTE_USER_AGENT)%'
+
+when@test:
+    services:
+        App\Tests\Support\ReponsesHttpSimulees: ~
+        App\Social\SaisieVideoService:
+            autowire: true
+            public: true
