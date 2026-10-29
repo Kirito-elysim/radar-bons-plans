@@ -7,6 +7,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    # Délai minimal entre deux requêtes vers un même domaine (règle de collecte : 1 requête / 2 s)
+    collecte.delai_par_domaine: 2.0
 
 services:
     # default configuration for services in *this* file
@@ -21,3 +23,15 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Collecte\Http\PoliteHttpClient:
+        arguments:
+            $client: '@collecte.client'
+            $cache: '@cache.collecte'
+            $delaiParDomaine: '%collecte.delai_par_domaine%'
+
+    App\Collecte\Http\RobotsTxtChecker:
+        arguments:
+            $client: '@collecte.client'
+            $cache: '@cache.collecte'
+            $userAgent: '%env(COLLECTE_USER_AGENT)%'

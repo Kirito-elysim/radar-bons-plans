@@ -1,0 +1,40 @@
+<!-- Fixture écrite à la main : cas limites du connecteur Anti-crise catalogues -->
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"/><title>Catalogues</title></head>
+<body>
+<div id="carousel" class="es-carousel-wrapper"><div class="es-carousel"><ul>
+  <li><a href="https://anti-crise.fr/catalogue/catalogue-action-du-28-decembre-au-03-janvier-2027/" title="Catalogue Action">
+    <img class="lazyload" data-src="https://media.anti-crise.fr/2026/12/action.jpg" alt="">
+    <div class="carousel-captions"><span class="carousel-enseigne">Action</span><span class="carousel-date">Du 28 décembre au 03 janvier 2027</span></div>
+  </a></li>
+  <!-- Doublon d'un catalogue présent dans un bloc enseigne : le bloc est prioritaire -->
+  <li><a href="https://anti-crise.fr/catalogue/catalogue-carrefour-du-04-au-15-novembre-2026-provencia/#page3">
+    <div class="carousel-captions"><span class="carousel-enseigne">Carrefour</span><span class="carousel-date">Du 04 au 15 novembre 2026</span></div>
+  </a></li>
+</ul></div></div>
+
+<div id="catalogue-selection" class="entry-summary"><div class="block-items-catalogue">
+  <div class="catalogue-item">
+    <div class="item-catalogue-title">10/11/2026 - 23/11/2026</div>
+    <a href="https://anti-crise.fr/catalogue/catalogue-lidl-du-10-au-23-novembre-2026/" class="info"><img src="/relatif.jpg" alt=""></a>
+  </div>
+</div></div>
+
+<a name="carrefour"></a>
+<h2>Carrefour <a href="#"><img src="https://media.anti-crise.fr/hautdepage.png" alt="HAUTDEPAGE"></a></h2>
+<div class="block-items-catalogue">
+  <div class="catalogue-item col-xs-6 catalogue-tag catalogue-new">
+    <h6>04/11/2026 - 15/11/2026</h6>
+    <a href="https://anti-crise.fr/catalogue/catalogue-carrefour-du-04-au-15-novembre-2026-provencia/" class="info"><img class="lazyload" data-src="https://media.anti-crise.fr/2026/10/provencia.jpg" alt=""></a>
+    <h6 class="bottom">Provencia</h6>
+  </div>
+  <div class="catalogue-item">
+    <h6>dates à venir</h6>
+    <a href="https://anti-crise.fr/catalogue/catalogue-carrefour-du-mois/" class="info"></a>
+  </div>
+  <!-- Lien hors fiche catalogue : ignoré -->
+  <div class="catalogue-item"><h6>01/11/2026 - 02/11/2026</h6><a href="https://www.carrefour.fr/promotions" class="info"></a></div>
+  <!-- Élément sans lien : ignoré -->
+  <div class="catalogue-item"><h6>01/11/2026 - 02/11/2026</h6></div>
+</div>
+</body></html>

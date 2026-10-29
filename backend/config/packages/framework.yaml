@@ -8,6 +8,23 @@ framework:
     #esi: true
     #fragments: true
 
+    # Client HTTP dédié à la collecte : User-Agent identifiable et retries avec backoff exponentiel
+    http_client:
+        scoped_clients:
+            collecte.client:
+                scope: 'https?://.*'
+                headers:
+                    User-Agent: '%env(COLLECTE_USER_AGENT)%'
+                    Accept-Language: 'fr-FR,fr;q=0.9'
+                timeout: 20
+                max_redirects: 3
+                retry_failed:
+                    max_retries: 3
+                    delay: 2000
+                    multiplier: 2
+                    max_delay: 30000
+                    http_codes: [423, 425, 429, 500, 502, 503, 504, 507]
+
 when@test:
     framework:
         test: true

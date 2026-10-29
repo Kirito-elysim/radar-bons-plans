@@ -2,7 +2,7 @@
 DC  = docker compose
 PHP = $(DC) run --rm php
 
-.PHONY: up down sh migrate migrate-test test phpstan qa
+.PHONY: up down sh migrate migrate-test test phpstan qa collecte
 
 up: ## Démarre PostgreSQL
 	$(DC) up -d postgres
@@ -26,3 +26,6 @@ phpstan: ## Analyse statique (niveau 8)
 	$(PHP) sh -c 'bin/console cache:warmup -q && vendor/bin/phpstan analyse --no-progress --memory-limit=1G'
 
 qa: test phpstan
+
+collecte: ## Lance la collecte (make collecte SOURCE=anti_crise_catalogue ARGS=--dry-run)
+	$(PHP) bin/console app:collecte $(SOURCE) $(ARGS)

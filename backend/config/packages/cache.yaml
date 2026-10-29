@@ -1,5 +1,10 @@
 framework:
     cache:
+        pools:
+            # Réponses HTTP (ETag / Last-Modified), robots.txt et horodatage du throttling par domaine
+            cache.collecte:
+                adapter: cache.adapter.filesystem
+                default_lifetime: 604800
         # Unique name of your app: used to compute stable namespaces for cache keys.
         #prefix_seed: your_vendor_name/app_name
 
