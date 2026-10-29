@@ -39,6 +39,7 @@ final class TableauDeBordProvider implements ProviderInterface
         $t = new TableauDeBord();
 
         $t->finissentSous3Jours = $this->deals->compter(new CriteresBonsPlans(expireSousJours: BonPlanMapper::SEUIL_CRITIQUE), $aujourdhui);
+        $t->finissentSous7Jours = $this->deals->compter(new CriteresBonsPlans(expireSousJours: BonPlanMapper::SEUIL_PROCHE), $aujourdhui);
         $t->rembourses100EnCours = $this->deals->compterRembourse100EnCours($aujourdhui);
         $t->nouveauxDepuisHier = $this->deals->compter(new CriteresBonsPlans(nouveaux: true), $aujourdhui);
         $t->economiePotentielle = $this->deals->sommeValeurEnCours($aujourdhui);

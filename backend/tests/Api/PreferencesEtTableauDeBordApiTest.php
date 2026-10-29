@@ -63,6 +63,7 @@ final class PreferencesEtTableauDeBordApiTest extends ApiTestCaseRadar
 
         self::assertResponseIsSuccessful();
         self::assertSame(1, $t['finissentSous3Jours']);
+        self::assertSame(3, $t['finissentSous7Jours']);
         self::assertSame(1, $t['rembourses100EnCours']);
         self::assertSame(1, $t['nouveauxDepuisHier']);
         self::assertSame('16.50', $t['economiePotentielle']);

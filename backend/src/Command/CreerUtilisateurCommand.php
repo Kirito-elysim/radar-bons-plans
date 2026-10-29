@@ -31,7 +31,8 @@ final class CreerUtilisateurCommand
         #[Option(description: 'Donne le rôle administrateur')]
         bool $admin = false,
     ): int {
-        $motDePasse = $io->askHidden('Mot de passe (10 caractères minimum)');
+        // RADAR_MOT_DE_PASSE permet un usage non interactif (scripts, CI) ; sinon saisie masquée.
+        $motDePasse = getenv('RADAR_MOT_DE_PASSE') ?: $io->askHidden('Mot de passe (10 caractères minimum)');
         if (!\is_string($motDePasse) || mb_strlen($motDePasse) < 10) {
             $io->error('Mot de passe trop court.');
 

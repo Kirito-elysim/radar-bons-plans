@@ -19,6 +19,7 @@ use App\State\TableauDeBordProvider;
 final class TableauDeBord
 {
     public int $finissentSous3Jours = 0;
+    public int $finissentSous7Jours = 0;
     public int $rembourses100EnCours = 0;
     public int $nouveauxDepuisHier = 0;
     /** Somme des montants connus des offres en cours. */
