@@ -7,6 +7,8 @@ import type {
   Economie,
   Preferences,
   Profil,
+  PushConfiguration,
+  RecapApercu,
   TableauDeBord,
   TikTokApercu,
 } from './types'
@@ -45,6 +47,8 @@ export const cles = {
   preferences: ['preferences'] as const,
   economies: ['economies'] as const,
   moi: ['moi'] as const,
+  push: ['push'] as const,
+  recap: ['recap'] as const,
 }
 
 export function useBonsPlans(params: ParametresRecherche, actif = true) {
@@ -160,4 +164,30 @@ export function useEnregistrerTikTok() {
       void client.invalidateQueries({ queryKey: cles.tableauDeBord })
     },
   })
+}
+
+export function useEnregistrerPreferences() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (p: Partial<Preferences>) => api<Preferences>('/preferences', 'PATCH', p),
+    onSuccess: (p) => {
+      client.setQueryData(cles.preferences, p)
+      void client.invalidateQueries({ queryKey: cles.tableauDeBord })
+      void client.invalidateQueries({ queryKey: cles.recap })
+    },
+  })
+}
+
+export function usePushConfiguration() {
+  return useQuery({ queryKey: cles.push, queryFn: () => api<PushConfiguration>('/push/configuration') })
+}
+
+export function useTestNotifications() {
+  return useMutation({
+    mutationFn: () => api<{ resultats: Record<string, string> }>('/notifications/test', 'POST', {}),
+  })
+}
+
+export function useRecapApercu(actif: boolean) {
+  return useQuery({ queryKey: cles.recap, queryFn: () => api<RecapApercu>('/recap/apercu'), enabled: actif })
 }

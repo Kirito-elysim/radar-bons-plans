@@ -1,9 +1,9 @@
 # Image PHP 8.3 commune : php-fpm, worker Messenger et scheduler
 FROM php:8.3-fpm-alpine AS base
 
-RUN apk add --no-cache icu-libs libpq libzip git unzip \
-    && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS icu-dev postgresql-dev libzip-dev linux-headers \
-    && docker-php-ext-install -j$(nproc) intl pdo_pgsql zip opcache bcmath \
+RUN apk add --no-cache icu-libs libpq libzip gmp git unzip \
+    && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS icu-dev postgresql-dev libzip-dev gmp-dev linux-headers \
+    && docker-php-ext-install -j$(nproc) intl pdo_pgsql zip opcache bcmath gmp \
     && pecl install apcu && docker-php-ext-enable apcu \
     && apk del .build-deps
 

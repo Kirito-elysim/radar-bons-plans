@@ -39,6 +39,8 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Réception des notifications push (public/sw-push.js)
+        importScripts: ['/sw-push.js'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [

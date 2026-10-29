@@ -17,4 +17,9 @@ class NotificationLogRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, NotificationLog::class);
     }
+
+    public function existe(string $cle): bool
+    {
+        return $this->count(['cleUnicite' => $cle]) > 0;
+    }
 }

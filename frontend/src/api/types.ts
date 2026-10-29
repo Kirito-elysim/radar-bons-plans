@@ -111,3 +111,25 @@ export interface Violation {
   propertyPath: string
   message: string
 }
+
+export interface PushConfiguration {
+  disponible: boolean
+  clePublique: string | null
+  appareils: number
+}
+
+export interface RecapApercu {
+  sujet: string
+  intro: string
+  resume: string[]
+  sections: {
+    titre: string
+    lignes: {
+      titre: string
+      url: string
+      qui: string | null
+      valeur: string | null
+      echeance: string | null
+    }[]
+  }[]
+}

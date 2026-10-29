@@ -8,6 +8,7 @@ const ONGLETS: { vers: string; libelle: string; icone: NomIcone }[] = [
   { vers: '/calendrier', libelle: 'Calendrier', icone: 'calendrier' },
   { vers: '/tiktok', libelle: 'Vidéo', icone: 'video' },
   { vers: '/economies', libelle: 'Économies', icone: 'tirelire' },
+  { vers: '/reglages', libelle: 'Réglages', icone: 'reglages' },
 ]
 
 export function Disposition() {

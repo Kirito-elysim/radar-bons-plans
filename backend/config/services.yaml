@@ -39,6 +39,8 @@ services:
 when@test:
     services:
         App\Tests\Support\ReponsesHttpSimulees: ~
+        App\Tests\Support\FauxEnvoyeurPush: ~
+        App\Notification\Canal\EnvoyeurPushInterface: '@App\Tests\Support\FauxEnvoyeurPush'
         App\Social\SaisieVideoService:
             autowire: true
             public: true

@@ -13,6 +13,7 @@ const CHEMINS = {
   gauche: 'm15 18-6-6 6-6',
   droite: 'm9 18 6-6-6-6',
   sortie: 'M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l4-4-4-4M14 12H4',
+  reglages: 'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',
   horloge: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
 } as const
 

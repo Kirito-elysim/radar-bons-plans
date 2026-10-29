@@ -1,0 +1,30 @@
+framework:
+    messenger:
+        failure_transport: failed
+
+        transports:
+            # Tâches de fond (collecte, alertes, récap) : file PostgreSQL, consommée par le worker.
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                retry_strategy:
+                    max_retries: 3
+                    delay: 60000
+                    multiplier: 3
+            failed: 'doctrine://default?queue_name=failed'
+            sync: 'sync://'
+
+        routing:
+            'App\Message\CollecterSources': async
+            'App\Message\VerifierNouveauxCatalogues': async
+            'App\Message\VerifierExpirations': async
+            'App\Message\EnvoyerRecapsDus': async
+            'App\Message\PurgerExpires': async
+            # Les notifications Symfony (e-mail, Telegram) partent immédiatement dans le worker courant.
+            'Symfony\Component\Mailer\Messenger\SendEmailMessage': sync
+            'Symfony\Component\Notifier\Message\ChatMessage': sync
+
+when@test:
+    framework:
+        messenger:
+            transports:
+                async: 'in-memory://'

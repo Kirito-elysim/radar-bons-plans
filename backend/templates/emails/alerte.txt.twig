@@ -1,0 +1,17 @@
+{{ message.sujet }}
+
+{{ message.intro }}
+{% for phrase in message.resume %}
+- {{ phrase }}
+{% endfor %}
+{% for titre, lignes in message.sections %}{% if lignes is not empty %}
+
+{{ titre|upper }}
+{% for ligne in lignes %}
+- {{ ligne.enTexte }}
+  {{ ligne.url }}
+{% endfor %}{% endif %}{% endfor %}
+{% if message.lienAppli %}
+
+Ouvrir Radar : {{ message.lienAppli }}
+{% endif %}

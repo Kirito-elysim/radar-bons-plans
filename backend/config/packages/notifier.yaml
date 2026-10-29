@@ -1,0 +1,5 @@
+framework:
+    notifier:
+        # Bot Telegram : telegram://JETON_DU_BOT@default (null://null = désactivé)
+        chatter_transports:
+            telegram: '%env(TELEGRAM_DSN)%'

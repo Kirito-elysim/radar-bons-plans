@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Deal;
+use App\Enum\DealType;
 use App\Enum\RemboursementType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -214,5 +215,48 @@ class DealRepository extends ServiceEntityRepository
         };
 
         return $qb->addOrderBy('d.id', 'ASC');
+    }
+
+    /**
+     * Bons plans en cours qui se terminent exactement à cette date.
+     *
+     * @return list<Deal>
+     */
+    public function findFinissantLe(\DateTimeImmutable $date): array
+    {
+        /** @var list<Deal> */
+        return $this->createQueryBuilder('d')
+            ->andWhere('d.expire = false')
+            ->andWhere('d.dateFin = :date')
+            ->setParameter('date', $date->setTime(0, 0), Types::DATE_IMMUTABLE)
+            ->orderBy('d.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Bons plans repérés depuis une date, encore valables, éventuellement filtrés par type / sous-type.
+     *
+     * @return list<Deal>
+     */
+    public function findNouveauxDepuis(\DateTimeImmutable $depuis, \DateTimeImmutable $aujourdhui, ?DealType $type = null, ?RemboursementType $sousType = null): array
+    {
+        $qb = $this->createQueryBuilder('d')
+            ->andWhere('d.premiereVueLe >= :depuis')
+            ->andWhere('d.expire = false')
+            ->andWhere('d.dateFin IS NULL OR d.dateFin >= :jour')
+            ->setParameter('depuis', $depuis)
+            ->setParameter('jour', $aujourdhui->setTime(0, 0), Types::DATE_IMMUTABLE)
+            ->orderBy('d.premiereVueLe', 'DESC')
+            ->addOrderBy('d.id', 'ASC');
+        if (null !== $type) {
+            $qb->andWhere('d.type = :type')->setParameter('type', $type);
+        }
+        if (null !== $sousType) {
+            $qb->andWhere('d.sousType = :sousType')->setParameter('sousType', $sousType);
+        }
+
+        /** @var list<Deal> */
+        return $qb->getQuery()->getResult();
     }
 }

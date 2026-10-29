@@ -2,7 +2,7 @@
 DC  = docker compose
 PHP = $(DC) run --rm php
 
-.PHONY: up down sh migrate migrate-test test phpstan qa collecte jwt utilisateur api front front-qa
+.PHONY: up down sh migrate migrate-test test phpstan qa collecte jwt utilisateur api front front-qa worker recap
 
 up: ## Démarre PostgreSQL
 	$(DC) up -d postgres
@@ -44,3 +44,9 @@ front: api ## Démarre le front Vite (http://localhost:5180)
 
 front-qa: ## Types, lint, format, tests et build du front
 	cd frontend && npx tsc -b && npm run lint && npm run format:check && npm test && npm run build
+
+worker: ## Worker : planning (collecte 6 h, purge 3 h, alertes 12 h, récap) + file async
+	$(PHP) bin/console messenger:consume scheduler_radar async -vv
+
+recap: ## Aperçu du récap d'un utilisateur (make recap EMAIL=moi@exemple.fr)
+	$(PHP) bin/console app:recap:quotidien $(EMAIL) --apercu
