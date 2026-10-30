@@ -274,4 +274,28 @@ class DealRepository extends ServiceEntityRepository
         /** @var list<Deal> */
         return $qb->getQuery()->getResult();
     }
+
+    /**
+     * Nombre de bons plans encore valables par source (identifiant de source → nombre).
+     *
+     * @return array<int, int>
+     */
+    public function compterEnCoursParSource(\DateTimeImmutable $aujourdhui): array
+    {
+        $lignes = $this->createQueryBuilder('d')
+            ->select('IDENTITY(d.source) AS source, COUNT(d.id) AS nb')
+            ->andWhere('d.expire = false')
+            ->andWhere('d.dateFin IS NULL OR d.dateFin >= :jour')
+            ->setParameter('jour', $aujourdhui->setTime(0, 0), Types::DATE_IMMUTABLE)
+            ->groupBy('d.source')
+            ->getQuery()
+            ->getArrayResult();
+
+        $resultat = [];
+        foreach ($lignes as $l) {
+            $resultat[(int) $l['source']] = (int) $l['nb'];
+        }
+
+        return $resultat;
+    }
 }

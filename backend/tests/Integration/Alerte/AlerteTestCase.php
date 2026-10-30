@@ -15,6 +15,7 @@ use App\Tests\Support\FauxEnvoyeurPush;
 use App\Tests\Support\ReponsesHttpSimulees;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Clock\Clock;
 use Symfony\Component\Clock\Test\ClockSensitiveTrait;
 use Symfony\Component\Mime\Email;
 
@@ -64,7 +65,8 @@ abstract class AlerteTestCase extends KernelTestCase
         $source = self::getContainer()->get(SourceRepository::class)->findOneByCode($code);
         self::assertNotNull($source);
         $url = 'https://exemple.test/'.rawurlencode($titre);
-        $maintenant = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris'));
+        // Horloge figée par mockTime() (et non l'heure réelle : les dates resteraient décalées après minuit).
+        $maintenant = Clock::get()->now()->setTimezone(new \DateTimeZone('Europe/Paris'));
 
         $deal = (new Deal($source, $type, $titre, $url, (new DealHasher())->hash($code, $url, $titre), $maintenant->modify('-'.$vuIlYA)))
             ->setSousType($sousType)

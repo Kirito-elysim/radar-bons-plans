@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router'
+import { useMoi } from '../api/requetes'
 import { useAuth } from '../auth/contexte'
 import { Icone, type NomIcone } from './Icone'
 import { MiseAJourPwa } from './MiseAJourPwa'
@@ -12,7 +13,8 @@ const ONGLETS: { vers: string; libelle: string; icone: NomIcone }[] = [
 ]
 
 export function Disposition() {
-  const { deconnecter } = useAuth()
+  const { connecte, deconnecter } = useAuth()
+  const admin = useMoi(connecte).data?.admin ?? false
 
   return (
     <div className="appli">
@@ -27,6 +29,11 @@ export function Disposition() {
               {o.libelle}
             </NavLink>
           ))}
+          {admin && (
+            <NavLink to="/admin" className="onglet">
+              Admin
+            </NavLink>
+          )}
         </nav>
         <button type="button" className="bouton-icone" onClick={deconnecter} title="Se déconnecter">
           <Icone nom="sortie" />

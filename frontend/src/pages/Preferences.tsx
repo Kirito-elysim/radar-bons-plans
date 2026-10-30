@@ -1,7 +1,9 @@
 import { useEffect, useState, type SyntheticEvent } from 'react'
+import { Link } from 'react-router'
 import { ErreurApi } from '../api/client'
 import {
   useEnregistrerPreferences,
+  useMoi,
   usePreferences,
   usePushConfiguration,
   useRecapApercu,
@@ -29,6 +31,7 @@ export function Preferences() {
 }
 
 function FormulairePreferences({ initiales }: { initiales: Prefs }) {
+  const admin = useMoi(true).data?.admin ?? false
   const enregistrer = useEnregistrerPreferences()
   const [p, setP] = useState(initiales)
   const [enregistre, setEnregistre] = useState(false)
@@ -50,6 +53,11 @@ function FormulairePreferences({ initiales }: { initiales: Prefs }) {
       <div className="page__tete">
         <h1>Réglages</h1>
         <p className="texte-doux">Choisissez vos enseignes, vos alertes et l'heure du récap quotidien.</p>
+        {admin && (
+          <Link to="/admin" className="bouton bouton--secondaire bouton--petit lien-admin">
+            Administration des sources
+          </Link>
+        )}
       </div>
 
       <form onSubmit={envoyer} className="formulaire">

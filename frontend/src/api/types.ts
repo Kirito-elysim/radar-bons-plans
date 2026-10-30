@@ -152,3 +152,37 @@ export interface StatistiquesEconomies {
   parEnseigne: { enseigne: string; total: string; nombre: number }[]
   parType: { type: string; libelle: string; total: string; nombre: number }[]
 }
+
+export type StatutCollecte = 'succes' | 'vide' | 'partiel' | 'erreur' | 'en_cours'
+
+export interface SourceAdmin {
+  id: number
+  code: string
+  nom: string
+  url: string
+  type: string
+  actif: boolean
+  collectable: boolean
+  dernierRun: string | null
+  dernierStatut: StatutCollecte | null
+  dernierNbDeals: number | null
+  dernierErreur: string | null
+  dealsEnCours: number
+  rapport: {
+    statut: StatutCollecte
+    recus: number
+    nouveaux: number
+    misAJour: number
+    pagesIgnorees: string[]
+    erreur: string | null
+  } | null
+}
+
+export interface Createur {
+  id: number
+  pseudo: string
+  plateforme: 'tiktok' | 'instagram' | 'youtube'
+  urlProfil: string | null
+  lienBio: string | null
+  actif: boolean
+}

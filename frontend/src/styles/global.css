@@ -1393,3 +1393,105 @@ select {
     font-size: 21px;
   }
 }
+
+/* ---------- Administration ---------- */
+
+.grille--sources {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+}
+
+.carte--inactive {
+  opacity: 0.6;
+}
+
+.source__url {
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source__chiffres {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: 0.5rem;
+  margin: 0.3rem 0;
+}
+
+.source__chiffres dt {
+  font-size: 0.72rem;
+  color: var(--encre-douce);
+}
+
+.source__chiffres dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.source__erreur {
+  margin: 0;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--rayon-petit);
+  background: var(--signal-fond);
+  color: var(--signal);
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.badge--statut-ok {
+  background: var(--gain-fond);
+  color: var(--gain);
+}
+
+.badge--statut-attention {
+  background: var(--ambre-fond);
+  color: var(--ambre);
+}
+
+.badge--statut-critique {
+  background: var(--signal);
+  color: #fff;
+}
+
+.liste-createurs {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ligne-createur {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ligne-createur__pseudo {
+  min-width: 120px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.ligne-createur input[type='url'],
+.ajout-createur input {
+  flex: 1;
+  min-width: 180px;
+  min-height: 38px;
+  padding: 0 0.7rem;
+  border-radius: var(--rayon-petit);
+  border: 1px solid var(--trait);
+  background: var(--papier);
+}
+
+.ajout-createur {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.lien-admin {
+  justify-self: start;
+  margin-top: 0.4rem;
+}

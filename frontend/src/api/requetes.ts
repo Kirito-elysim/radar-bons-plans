@@ -10,6 +10,8 @@ import type {
   PushConfiguration,
   RecapApercu,
   StatistiquesEconomies,
+  SourceAdmin,
+  Createur,
   TableauDeBord,
   TikTokApercu,
 } from './types'
@@ -52,6 +54,8 @@ export const cles = {
   push: ['push'] as const,
   recap: ['recap'] as const,
   statistiques: ['statistiquesEconomies'] as const,
+  sources: ['adminSources'] as const,
+  createurs: ['createurs'] as const,
 }
 
 export function useBonsPlans(params: ParametresRecherche, actif = true) {
@@ -226,6 +230,59 @@ export function useModifierEconomie() {
       void client.invalidateQueries({ queryKey: cles.economies })
       void client.invalidateQueries({ queryKey: cles.statistiques })
       void client.invalidateQueries({ queryKey: cles.tableauDeBord })
+    },
+  })
+}
+
+export function useSourcesAdmin() {
+  return useQuery({
+    queryKey: cles.sources,
+    queryFn: () => api<Collection<SourceAdmin>>('/admin/sources'),
+    select: (d) => d.member,
+  })
+}
+
+function remplacerSource(liste: Collection<SourceAdmin> | undefined, source: SourceAdmin) {
+  return liste ? { ...liste, member: liste.member.map((s) => (s.id === source.id ? source : s)) } : liste
+}
+
+export function useBasculerSource() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (s: SourceAdmin) => api<SourceAdmin>(`/admin/sources/${s.id}`, 'PATCH', { actif: !s.actif }),
+    onSuccess: (source) =>
+      client.setQueryData<Collection<SourceAdmin>>(cles.sources, (d) => remplacerSource(d, source)),
+  })
+}
+
+export function useRelancerSource() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (s: SourceAdmin) => api<SourceAdmin>(`/admin/sources/${s.id}/relancer`, 'POST', {}),
+    onSuccess: (source) => {
+      client.setQueryData<Collection<SourceAdmin>>(cles.sources, (d) => remplacerSource(d, source))
+      void client.invalidateQueries({ queryKey: ['bonsPlans'] })
+      void client.invalidateQueries({ queryKey: cles.tableauDeBord })
+    },
+  })
+}
+
+export function useCreateurs() {
+  return useQuery({
+    queryKey: cles.createurs,
+    queryFn: () => api<Collection<Createur>>('/createurs'),
+    select: (d) => d.member,
+  })
+}
+
+export function useEnregistrerCreateur() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, ...c }: Partial<Createur> & { pseudo: string }) =>
+      id ? api<Createur>(`/createurs/${id}`, 'PATCH', c) : api<Createur>('/createurs', 'POST', c),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: cles.createurs })
+      void client.invalidateQueries({ queryKey: cles.sources })
     },
   })
 }
