@@ -2,7 +2,6 @@ import { NavLink, Outlet } from 'react-router'
 import { useMoi } from '../api/requetes'
 import { useAuth } from '../auth/contexte'
 import { Icone, type NomIcone } from './Icone'
-import { MiseAJourPwa } from './MiseAJourPwa'
 
 const ONGLETS: { vers: string; libelle: string; icone: NomIcone }[] = [
   { vers: '/', libelle: 'Bons plans', icone: 'accueil' },
@@ -53,7 +52,6 @@ export function Disposition() {
           </NavLink>
         ))}
       </nav>
-      <MiseAJourPwa />
     </div>
   )
 }

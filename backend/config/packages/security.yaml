@@ -39,6 +39,7 @@ security:
         - { path: ^/api/connexion$, roles: PUBLIC_ACCESS }
         - { path: ^/api/inscription$, roles: PUBLIC_ACCESS, methods: [POST] }
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
+        - { path: ^/api/sante$, roles: PUBLIC_ACCESS }
         - { path: ^/api$, roles: PUBLIC_ACCESS }
         - { path: ^/api/admin, roles: ROLE_ADMIN }
         - { path: ^/api, roles: ROLE_USER }

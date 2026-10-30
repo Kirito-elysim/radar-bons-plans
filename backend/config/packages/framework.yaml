@@ -2,6 +2,10 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
+    # Derrière Traefik (Coolify) puis nginx : vraie IP du visiteur (limitation des connexions) et HTTPS.
+    trusted_proxies: '%env(TRUSTED_PROXIES)%'
+    trusted_headers: ['x-forwarded-for', 'x-forwarded-proto', 'x-forwarded-host', 'x-forwarded-port']
+
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 

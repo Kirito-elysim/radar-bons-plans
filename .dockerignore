@@ -1,0 +1,12 @@
+.git
+.claude
+.DS_Store
+**/node_modules
+frontend/dist
+frontend/dev-dist
+backend/vendor
+backend/var
+backend/.env.local
+backend/.env.*.local
+backend/config/jwt/*.pem
+backend/.phpunit.cache

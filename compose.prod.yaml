@@ -1,0 +1,110 @@
+# Production (Coolify « Docker Compose ») : nginx + PWA, php-fpm, worker Messenger, scheduler, PostgreSQL.
+# Toutes les variables viennent de l'environnement (onglet « Environment Variables » de Coolify) : voir .env.example.
+# Domaine : à attribuer au service « nginx » (port 80) dans Coolify ; Traefik fournit le HTTPS.
+
+x-php: &php
+  build:
+    context: .
+    dockerfile: docker/php/Dockerfile
+    target: prod
+  image: radar-bons-plans-php:latest
+  restart: unless-stopped
+  environment: &php-env
+    APP_ENV: prod
+    APP_SECRET: ${APP_SECRET:?APP_SECRET manquant}
+    DATABASE_URL: postgresql://${POSTGRES_USER:-radar}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant}@postgres:5432/${POSTGRES_DB:-radar}?serverVersion=16&charset=utf8
+    MESSENGER_TRANSPORT_DSN: doctrine://default?auto_setup=0
+    JWT_PASSPHRASE: ${JWT_PASSPHRASE:?JWT_PASSPHRASE manquant}
+    JWT_TTL: ${JWT_TTL:-604800}
+    CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-^$}  # même origine que la PWA : aucun CORS nécessaire
+    INSCRIPTIONS_OUVERTES: ${INSCRIPTIONS_OUVERTES:-0}
+    TRUSTED_PROXIES: ${TRUSTED_PROXIES:-private_ranges}
+    COLLECTE_USER_AGENT: ${COLLECTE_USER_AGENT:-RadarBonsPlans/1.0 (agrégateur personnel de bons plans)}
+    MAILER_DSN: ${MAILER_DSN:-null://null}
+    MAILER_FROM: ${MAILER_FROM:-Radar Bons Plans <radar@localhost>}
+    TELEGRAM_DSN: ${TELEGRAM_DSN:-null://null}
+    APP_URL_FRONT: ${APP_URL_FRONT:?APP_URL_FRONT manquant (ex. https://radar.exemple.fr)}
+    ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+    ADMIN_TELEGRAM_CHAT_ID: ${ADMIN_TELEGRAM_CHAT_ID:-}
+    VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+    VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+    VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:radar@localhost}
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    image: radar-bons-plans-nginx:latest
+    restart: unless-stopped
+    expose:
+      - "80"
+    depends_on:
+      php:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/api/sante >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # PHP-FPM : sert l'API ; applique les migrations et crée les clés JWT au démarrage.
+  php:
+    <<: *php
+    environment:
+      <<: *php-env
+      RADAR_ROLE: web
+    volumes:
+      - jwt:/app/config/jwt
+    healthcheck:
+      test: ["CMD-SHELL", "php-fpm -t >/dev/null 2>&1 && php bin/console dbal:run-sql -q 'SELECT 1'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Worker : tâches de fond (collecte déclenchée, alertes « nouveau catalogue »…), redémarré toutes les heures.
+  worker:
+    <<: *php
+    environment:
+      <<: *php-env
+      RADAR_ROLE: worker
+    command: ["php", "bin/console", "messenger:consume", "async", "--time-limit=3600", "--memory-limit=256M", "-vv"]
+    depends_on:
+      php:
+        condition: service_healthy
+
+  # Scheduler : collecte toutes les 6 h, purge à 3 h, alertes à 12 h, récap à l'heure de chacun.
+  scheduler:
+    <<: *php
+    environment:
+      <<: *php-env
+      RADAR_ROLE: scheduler
+    command: ["php", "bin/console", "messenger:consume", "scheduler_radar", "--time-limit=3600", "--memory-limit=256M", "-vv"]
+    depends_on:
+      php:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-radar}
+      POSTGRES_USER: ${POSTGRES_USER:-radar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant}
+      TZ: Europe/Paris
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-radar} -d ${POSTGRES_DB:-radar}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
+  jwt:

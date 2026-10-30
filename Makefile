@@ -2,7 +2,7 @@
 DC  = docker compose
 PHP = $(DC) run --rm php
 
-.PHONY: up down sh migrate migrate-test test phpstan qa collecte jwt utilisateur api front front-qa worker recap
+.PHONY: up down sh migrate migrate-test test phpstan qa collecte jwt utilisateur api front front-qa worker recap prod-build prod-config
 
 up: ## Démarre PostgreSQL
 	$(DC) up -d postgres
@@ -50,3 +50,9 @@ worker: ## Worker : planning (collecte 6 h, purge 3 h, alertes 12 h, récap) + f
 
 recap: ## Aperçu du récap d'un utilisateur (make recap EMAIL=moi@exemple.fr)
 	$(PHP) bin/console app:recap:quotidien $(EMAIL) --apercu
+
+prod-build: ## Construit les images de production (php-fpm, nginx + PWA)
+	docker compose -f compose.prod.yaml build
+
+prod-config: ## Vérifie compose.prod.yaml avec un fichier de variables (make prod-config ENV=chemin/vers/.env)
+	docker compose --env-file $(ENV) -f compose.prod.yaml config -q && echo "compose.prod.yaml valide"

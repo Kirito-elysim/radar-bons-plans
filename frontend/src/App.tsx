@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { useAuth } from './auth/contexte'
 import { Disposition } from './components/Disposition'
+import { MiseAJourPwa } from './components/MiseAJourPwa'
 import { useMoi } from './api/requetes'
 import { Admin } from './pages/Admin'
 import { AjoutVideo } from './pages/AjoutVideo'
@@ -14,10 +15,19 @@ export function App() {
   const { connecte } = useAuth()
   const moi = useMoi(connecte)
 
-  if (!connecte) return <Connexion />
+  // Le service worker est enregistré dès l'écran de connexion (installation, hors ligne, push).
+  if (!connecte) {
+    return (
+      <>
+        <Connexion />
+        <MiseAJourPwa />
+      </>
+    )
+  }
 
   return (
     <BrowserRouter>
+      <MiseAJourPwa />
       <Routes>
         <Route element={<Disposition />}>
           <Route index element={<TableauDeBord />} />
