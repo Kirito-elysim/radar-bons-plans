@@ -49,7 +49,7 @@ final class CollecteOrchestratorTest extends KernelTestCase
         $this->dispatcher->addListener(ConnecteurVideEvent::class, function (ConnecteurVideEvent $e): void {
             $this->evenements[] = $e;
         });
-        $this->pageCatalogues = Fixtures::lire('anti-crise/catalogues.html');
+        $this->pageCatalogues = Fixtures::lire('anti-crise/catalogues-synthetique.html');
         $this->robots = "User-agent: *\nDisallow: */feed\nDisallow: */feed/";
     }
 
@@ -85,24 +85,24 @@ final class CollecteOrchestratorTest extends KernelTestCase
 
         $premier = $orchestrateur->executer(AntiCriseCatalogueConnector::CODE);
         self::assertSame(RunStatus::Succes, $premier->statut);
-        self::assertSame(361, $premier->nbRecus);
-        self::assertSame(361, $premier->nbNouveaux);
+        self::assertSame(7, $premier->nbRecus);
+        self::assertSame(7, $premier->nbNouveaux);
 
         $this->clock->sleep(6 * 3600);
         $second = $orchestrateur->executer(AntiCriseCatalogueConnector::CODE);
         self::assertSame(0, $second->nbNouveaux);
-        self::assertSame(361, $second->nbMisAJour);
+        self::assertSame(7, $second->nbMisAJour);
 
         $em = self::getContainer()->get(EntityManagerInterface::class);
         $em->clear();
         $source = self::getContainer()->get(SourceRepository::class)->findOneByCode(AntiCriseCatalogueConnector::CODE);
         self::assertNotNull($source);
         self::assertSame(RunStatus::Succes, $source->getDernierStatut());
-        self::assertSame(361, $source->getDernierNbDeals());
+        self::assertSame(7, $source->getDernierNbDeals());
         self::assertSame('2026-10-29 13:40', $source->getDernierRun()?->format('Y-m-d H:i'));
 
         $deals = self::getContainer()->get(DealRepository::class)->findBy(['source' => $source]);
-        self::assertCount(361, $deals);
+        self::assertCount(7, $deals);
         $provencia = self::getContainer()->get(DealRepository::class)->findOneBy(['region' => 'paca', 'enseigne' => 'Carrefour', 'descriptionCourte' => 'Provencia']);
         self::assertNotNull($provencia);
         self::assertSame('2026-11-15', $provencia->getDateFin()?->format('Y-m-d'));
@@ -116,8 +116,8 @@ final class CollecteOrchestratorTest extends KernelTestCase
         $this->orchestrateur()->executer(AntiCriseCatalogueConnector::CODE);
         $deals = self::getContainer()->get(DealRepository::class);
 
-        $termine = $deals->findOneBy(['url' => 'https://anti-crise.fr/catalogue/catalogue-aldi-du-27-octobre-au-02-novembre-2026/']);
-        self::assertTrue($termine?->isExpire(), 'Fini le 02/11, collecté le 05/11');
+        $termine = $deals->findOneBy(['url' => 'https://anti-crise.fr/catalogue/catalogue-action-du-28-octobre-au-03-novembre-2026/']);
+        self::assertTrue($termine?->isExpire(), 'Fini le 03/11, collecté le 05/11');
 
         $enCours = $deals->findOneBy(['url' => 'https://anti-crise.fr/catalogue/catalogue-carrefour-du-04-au-15-novembre-2026-provencia/']);
         self::assertFalse($enCours?->isExpire());
@@ -173,7 +173,7 @@ final class CollecteOrchestratorTest extends KernelTestCase
     {
         $rapport = $this->orchestrateur()->executer(AntiCriseCatalogueConnector::CODE, simulation: true);
 
-        self::assertSame(361, $rapport->nbRecus);
+        self::assertSame(7, $rapport->nbRecus);
         self::assertSame(0, self::getContainer()->get(DealRepository::class)->count([]));
     }
 

@@ -4,3 +4,6 @@
 /.idea/
 /.vscode/
 /.claude/
+
+# Pages réelles des sites sources : utilisées par les tests en local, jamais publiées (droits des sites)
+/backend/tests/fixtures/reelles/

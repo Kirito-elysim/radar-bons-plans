@@ -15,12 +15,12 @@ use PHPUnit\Framework\TestCase;
 
 final class RadinsConnectorTest extends TestCase
 {
-    private function connecteur(?HttpPoliFactory $factory = null, string $robots = "User-agent: *\nAllow: /"): RadinsConnector
+    private function connecteur(?HttpPoliFactory $factory = null, string $robots = "User-agent: *\nAllow: /", bool $pagesReelles = true): RadinsConnector
     {
-        $http = ($factory ?? new HttpPoliFactory())->creer([
-            'https://www.radins.com/code-promo/' => Fixtures::lire('radins/code-promo.html'),
-            'https://www.radins.com/' => Fixtures::lire('radins/accueil.html'),
-        ], $robots);
+        $http = ($factory ?? new HttpPoliFactory())->creer($pagesReelles ? [
+            'https://www.radins.com/code-promo/' => Fixtures::reelle('radins/code-promo.html'),
+            'https://www.radins.com/' => Fixtures::reelle('radins/accueil.html'),
+        ] : [], $robots);
 
         return new RadinsConnector($http, new MontantParser());
     }
@@ -52,7 +52,7 @@ final class RadinsConnectorTest extends TestCase
 
     public function testCodePromoEnPourcentageAvecCondition(): void
     {
-        $deals = $this->connecteur()->parser(Fixtures::lire('radins/code-promo.html'));
+        $deals = $this->connecteur()->parser(Fixtures::reelle('radins/code-promo.html'));
         $shein = self::parEnseigne($deals, 'SHEIN');
 
         self::assertSame('Code promo', $shein->categorie);
@@ -64,7 +64,7 @@ final class RadinsConnectorTest extends TestCase
 
     public function testBonPlanEnEurosSansDateDeFin(): void
     {
-        $orange = self::parEnseigne($this->connecteur()->parser(Fixtures::lire('radins/code-promo.html')), 'Orange Internet');
+        $orange = self::parEnseigne($this->connecteur()->parser(Fixtures::reelle('radins/code-promo.html')), 'Orange Internet');
 
         self::assertSame('Bon plan', $orange->categorie);
         self::assertSame('49.00', $orange->valeurEuros);
@@ -73,7 +73,7 @@ final class RadinsConnectorTest extends TestCase
 
     public function testLeCodeLuiMemeNEstJamaisStocke(): void
     {
-        $deals = $this->connecteur()->parser(Fixtures::lire('radins/code-promo.html'));
+        $deals = $this->connecteur()->parser(Fixtures::reelle('radins/code-promo.html'));
 
         self::assertStringNotContainsString('HELLO15', serialize($deals));
     }
@@ -85,7 +85,7 @@ final class RadinsConnectorTest extends TestCase
             ['idPool' => 'b', 'title' => '5 € chez Y', 'type' => 'deal', 'isExpired' => false, 'retailer' => ['name' => 'Y', 'rlpUrl' => 'code-promo/y/'], 'caption' => ['first' => '5€'], 'endTime' => ''],
             ['title' => 'Sans identifiant'],
         ]]]]]]]);
-        $deals = $this->connecteur()->parser('<html><body><script id="__NEXT_DATA__" type="application/json">'.$json.'</script></body></html>');
+        $deals = $this->connecteur(pagesReelles: false)->parser('<html><body><script id="__NEXT_DATA__" type="application/json">'.$json.'</script></body></html>');
 
         self::assertCount(1, $deals);
         self::assertSame('Y', $deals[0]->enseigne);
@@ -97,7 +97,7 @@ final class RadinsConnectorTest extends TestCase
         $this->expectException(CollecteException::class);
         $this->expectExceptionMessage('__NEXT_DATA__ absent');
 
-        $this->connecteur()->parser('<html><body><div class="voucher">10 %</div></body></html>');
+        $this->connecteur(pagesReelles: false)->parser('<html><body><div class="voucher">10 %</div></body></html>');
     }
 
     public function testPageInterditeSautee(): void

@@ -82,7 +82,7 @@ final class AdminSourcesApiTest extends ApiTestCaseRadar
 
     public function testRelancerUneSource(): void
     {
-        ReponsesHttpSimulees::definir('https://anti-crise.fr/catalogue/', new MockResponse(Fixtures::lire('anti-crise/catalogues.html')));
+        ReponsesHttpSimulees::definir('https://anti-crise.fr/catalogue/', new MockResponse(Fixtures::lire('anti-crise/catalogues-synthetique.html')));
         $auth = $this->authentifie($this->creerUtilisateur('admin@exemple.test', admin: true));
         $id = $this->sourceAdmin($auth, 'anti_crise_catalogue')['id'];
 
@@ -90,9 +90,9 @@ final class AdminSourcesApiTest extends ApiTestCaseRadar
 
         self::assertResponseStatusCodeSame(200);
         self::assertSame('succes', $r['dernierStatut']);
-        self::assertSame(361, $r['dernierNbDeals']);
-        self::assertSame(['statut' => 'succes', 'recus' => 361, 'nouveaux' => 361, 'misAJour' => 0, 'pagesIgnorees' => [], 'erreur' => null], $r['rapport']);
-        self::assertSame(361, $r['dealsEnCours'] + $this->expiresDansFixture());
+        self::assertSame(7, $r['dernierNbDeals']);
+        self::assertSame(['statut' => 'succes', 'recus' => 7, 'nouveaux' => 7, 'misAJour' => 0, 'pagesIgnorees' => [], 'erreur' => null], $r['rapport']);
+        self::assertSame(7, $r['dealsEnCours'] + $this->expiresDansFixture());
     }
 
     public function testRelancerEnErreurEtSourceManuelle(): void
@@ -110,7 +110,7 @@ final class AdminSourcesApiTest extends ApiTestCaseRadar
     }
 
     /**
-     * Catalogues de la fixture déjà terminés à la date du jour (la fixture date du 29/10/2026).
+     * Catalogues de la fixture déjà terminés à la date du jour (fixture synthétique datée de fin octobre 2026).
      */
     private function expiresDansFixture(): int
     {

@@ -26,7 +26,7 @@ final class ShopmiumConnectorTest extends TestCase
     private function deals(): array
     {
         $connecteur = new ShopmiumConnector($this->createStub(PoliteHttpClient::class), new FrenchDateParser(), new MontantParser(), new MockClock(self::MAINTENANT));
-        $deals = $connecteur->parser(Fixtures::lire('shopmium/offres.html'), new \DateTimeImmutable(self::MAINTENANT, new \DateTimeZone('Europe/Paris')));
+        $deals = $connecteur->parser(Fixtures::reelle('shopmium/offres.html'), new \DateTimeImmutable(self::MAINTENANT, new \DateTimeZone('Europe/Paris')));
 
         $parId = [];
         foreach ($deals as $deal) {
@@ -88,7 +88,7 @@ final class ShopmiumConnectorTest extends TestCase
     public function testFetchLitUniquementLaListe(): void
     {
         $factory = new HttpPoliFactory();
-        $http = $factory->creer(['https://offers.shopmium.com/fr' => Fixtures::lire('shopmium/offres.html')], "User-Agent: *\nDisallow: /offers/");
+        $http = $factory->creer(['https://offers.shopmium.com/fr' => Fixtures::reelle('shopmium/offres.html')], "User-Agent: *\nDisallow: /offers/");
 
         $deals = (new ShopmiumConnector($http, new FrenchDateParser(), new MontantParser(), new MockClock(self::MAINTENANT)))->fetch();
 

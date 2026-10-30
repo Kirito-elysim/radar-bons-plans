@@ -30,7 +30,9 @@ final class AntiCriseCatalogueConnectorTest extends TestCase
      */
     private function parserFixture(string $fichier): array
     {
-        return $this->connecteur->parser(Fixtures::lire('anti-crise/'.$fichier), $this->reference);
+        $html = 'catalogues.html' === $fichier ? Fixtures::reelle('anti-crise/catalogues.html') : Fixtures::lire('anti-crise/'.$fichier);
+
+        return $this->connecteur->parser($html, $this->reference);
     }
 
     /**

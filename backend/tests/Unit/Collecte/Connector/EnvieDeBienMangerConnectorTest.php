@@ -21,9 +21,9 @@ final class EnvieDeBienMangerConnectorTest extends TestCase
      */
     private static function pages(): array
     {
-        $pages = [self::LISTE => Fixtures::lire('envie-de-bien-manger/bons-page0.html')];
+        $pages = [self::LISTE => Fixtures::reelle('envie-de-bien-manger/bons-page0.html')];
         foreach ([1, 2, 3, 4] as $n) {
-            $pages[self::LISTE.'?page=%2C'.$n] = Fixtures::lire(\sprintf('envie-de-bien-manger/bons-page%d.html', $n));
+            $pages[self::LISTE.'?page=%2C'.$n] = Fixtures::reelle(\sprintf('envie-de-bien-manger/bons-page%d.html', $n));
         }
 
         return $pages;
@@ -43,7 +43,7 @@ final class EnvieDeBienMangerConnectorTest extends TestCase
     public function testContenuDUnBon(): void
     {
         $deals = (new EnvieDeBienMangerConnector((new HttpPoliFactory())->creer([]), new MontantParser()))
-            ->parser(Fixtures::lire('envie-de-bien-manger/bons-page0.html'));
+            ->parser(Fixtures::reelle('envie-de-bien-manger/bons-page0.html'));
 
         self::assertCount(9, $deals);
         $kefir = $deals[0];

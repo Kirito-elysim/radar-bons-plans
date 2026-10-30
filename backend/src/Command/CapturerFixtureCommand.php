@@ -30,7 +30,7 @@ final class CapturerFixtureCommand
         SymfonyStyle $io,
         #[Argument(description: 'URL de la page')]
         string $url,
-        #[Argument(description: 'Chemin relatif dans tests/fixtures, ex. anti-crise/catalogues.html')]
+        #[Argument(description: 'Chemin relatif dans tests/fixtures, ex. reelles/anti-crise/catalogues.html (dossier non versionné)')]
         string $fichier,
     ): int {
         $html = self::alleger($this->http->get($url));

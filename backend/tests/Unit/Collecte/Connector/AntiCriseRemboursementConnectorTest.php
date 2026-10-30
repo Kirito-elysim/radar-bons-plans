@@ -23,7 +23,7 @@ final class AntiCriseRemboursementConnectorTest extends TestCase
     {
         $connecteur = new AntiCriseRemboursementConnector($this->createStub(PoliteHttpClient::class), new FrenchDateParser(), new MontantParser());
 
-        return $connecteur->parser(Fixtures::lire('anti-crise/remboursements.html'));
+        return $connecteur->parser(Fixtures::reelle('anti-crise/remboursements.html'));
     }
 
     /**
@@ -83,7 +83,7 @@ final class AntiCriseRemboursementConnectorTest extends TestCase
 
     public function testStructureModifiee(): void
     {
-        $html = str_replace('catalogue-item', 'carte-offre', Fixtures::lire('anti-crise/remboursements.html'));
+        $html = str_replace('catalogue-item', 'carte-offre', Fixtures::lire('anti-crise/remboursements-synthetique.html'));
         $connecteur = new AntiCriseRemboursementConnector($this->createStub(PoliteHttpClient::class), new FrenchDateParser(), new MontantParser());
 
         self::assertSame([], $connecteur->parser($html));

@@ -15,6 +15,12 @@ envoie un récap quotidien et suit les économies réalisées.
 
 Prérequis : Docker (ou OrbStack) et Node 24. PHP n'est pas nécessaire sur la machine.
 
+Créer d'abord `backend/.env.local` (non versionné) avec vos propres secrets de développement :
+
+```bash
+printf 'APP_SECRET=%s\nJWT_PASSPHRASE=%s\n' "$(openssl rand -hex 16)" "$(openssl rand -hex 32)" > backend/.env.local
+```
+
 ```bash
 make up            # PostgreSQL
 make migrate       # schéma + sources de référence
@@ -25,9 +31,11 @@ make front         # API http://localhost:8088 + PWA http://localhost:5180
 make worker        # planning : collecte 6 h, purge 3 h, alertes 12 h, récap à l'heure de chacun
 ```
 
-Qualité : `make qa` (PHPUnit, PHPStan niveau 8, ESLint, Prettier, Vitest, build). Les tests de connecteurs
-tournent sur des pages réelles enregistrées dans `backend/tests/fixtures/` (`app:fixtures:capturer` pour les
-rafraîchir quand un site change).
+Qualité : `make qa` (PHPUnit, PHPStan niveau 8, ESLint, Prettier, Vitest, build). Les connecteurs sont testés
+sur des pages **synthétiques** (`backend/tests/fixtures/`, structure des sites, contenus fictifs), toujours
+exécutées en CI. Les pages réelles des sites ne sont pas publiées : capturez-les en local dans
+`backend/tests/fixtures/reelles/` (`app:fixtures:capturer <url> reelles/<site>/<page>.html`) pour lancer aussi
+les tests sur les vraies pages ; sans elles, ces tests sont ignorés.
 
 Commandes utiles (`docker compose run --rm php bin/console …`) :
 
